@@ -1,108 +1,156 @@
-# Repensei — (Backend)
 
-Descrição: projeto para suporte a atividades de Filosofia e Sociologia com chat de IA, quizzes, flashcards e planos freemium/premium/adm.
+-----
 
-**Principais funcionalidades**:
-- **Chat IA**: Chat em tempo real via Socket.IO usando Google Generative AI (modelo configurável).
-- **Autenticação**: Rotas de login/registro e diferenciação entre plano `freemium` e `premium`.
-- **Quizzes & Flashcards**: Conteúdo armazenado e rotinas para gerar/avaliar atividades.
-- **Gerenciamento de chaves**: Rotação e monitoramento das chaves de API (arquivo `api_key_manager.py`).
+# Repensei - Frontend (TCC)
 
-**Stack**:
-- **Backend**: Python 3 + Flask, Flask-SocketIO.
-- **Frontend**: HTML/CSS/JS estático (arquivos em `TCC_frontend`).
+Este repositório contém a interface web (Frontend) da aplicação **Repensei**, uma plataforma de ensino de Filosofia e Sociologia. O projeto foca em uma experiência de usuário moderna, responsiva e interativa, conectando-se a uma API Backend para fornecer recursos de Inteligência Artificial.
 
-**Estrutura do projeto**
-- **`TCC_Backend/`**: código do servidor Flask
-  - `app.py`: aplicação principal e Socket.IO
-  - `api_key_manager.py`: gerencia chaves da API GenAI
-  - `auth_routes.py`, `freemium_routes.py`, `premium_routes.py`, `admin_routes.py`, `quiz_routes.py`: blueprints/rotas
-  - `init_db.py`: inicializa banco SQLite (`repensei.db`)
-  - `setup_keys.py`: helper para criar/configurar chaves iniciais
-  - `requirements.txt`: dependências Python
-  - `banco.sql`, `flashcards.json`, `questions.json`: dados e scripts auxiliares
+## 🎨 Design & UX
 
+O design do projeto adota o estilo **Glassmorphism** (efeito de vidro fosco), utilizando gradientes suaves (tons de roxo, rosa e azul) e elementos translúcidos para criar uma interface moderna e imersiva.
 
-**Pré-requisitos**
-- Python 3.8+ instalado.
-- Acesso à internet para chamadas à API GenAI (se usar o chatbot).
+**Destaques Visuais:**
 
-**Variáveis de ambiente**
-- Crie um arquivo `.env` dentro de `TCC_Backend` contendo pelo menos:
-  - `SECRET_KEY` — segredo da aplicação Flask.
+  * **Glassmorphism:** Paineis e modais com `backdrop-filter: blur`.
+  * **Responsividade:** Layout adaptável para Mobile e Desktop via **Tailwind CSS**.
+  * **Micro-interações:** Animações de *fade-in*, transições suaves em botões e *toasts* de notificação.
+  * **Visualização de Dados:** Gráficos interativos no painel administrativo.
 
-As chaves da Google Generative AI são gerenciadas pelo `APIKeyManager`. Use `setup_keys.py` para adicionar chaves.
+## 📋 Funcionalidades da Interface
 
-**Instalação (Windows / PowerShell)**
-1. Abra PowerShell e navegue até a pasta do projeto (onde estão `TCC_Backend` e `TCC_frontend`).
-2. Criar e ativar ambiente virtual:
+A aplicação Frontend gerencia diferentes experiências baseadas no perfil do usuário:
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate
+### 🏠 Pública
+
+  * **Landing Page:** Apresentação da plataforma.
+  * **Autenticação:** Modais de Login e Cadastro animados.
+  * **Upgrade:** Página de simulação de pagamento com **animação 3D de cartão de crédito** (Flip Card).
+
+### 🆓 Aluno Freemium
+
+  * Acesso restrito a conteúdos de curadoria.
+  * Interface para seleção de Quizzes e Flashcards estáticos.
+  * Incentivos visuais para upgrade (botões e banners).
+
+### 💎 Aluno Premium
+
+  * **Dashboard Completo:** Acesso a todas as ferramentas de IA.
+  * **Chatbot Real-time:** Interface de chat conectada via Socket.IO com indicador de "digitando".
+  * **Histórico Interativo:** Visualização detalhada de atividades passadas (clique para expandir).
+  * **Geradores Dinâmicos:** Formulários para solicitar Resumos, Correções e Flashcards à IA.
+
+### ⚙️ Administrador
+
+  * **Dashboard Analítico:** Cards de métricas e gráficos (Pizza e Barras) via Chart.js.
+  * **Gestão de Alunos:** Tabela com ações de CRUD (Criar, Editar, Excluir) e visualização de performance individual.
+
+-----
+
+## 🛠️ Tecnologias Utilizadas
+
+O projeto foi desenvolvido utilizando **Vanilla JavaScript** (JS Puro) e bibliotecas via CDN para manter a leveza e simplicidade.
+
+  * **Estrutura:** HTML5 Semântico.
+  * **Estilização:**
+      * [Tailwind CSS](https://tailwindcss.com/) (via CDN) - Framework utilitário.
+      * `style.css` - Customizações para animações, scrollbars e efeitos Glass.
+      * [Google Material Icons](https://fonts.google.com/icons) - Iconografia.
+  * **JavaScript & Bibliotecas:**
+      * **ES6+ Modules:** Lógica separada por responsabilidade (`login.js`, `premium.js`, etc.).
+      * [Socket.IO Client](https://socket.io/): Para comunicação em tempo real no Chatbot.
+      * [Chart.js](https://www.chartjs.org/): Para renderização dos gráficos no painel Admin.
+
+-----
+
+## 📂 Estrutura de Arquivos
+
+```text
+TCC_Frontend/
+├── index.html          # Landing page
+├── login.html          # (Redirecionamento/Estrutura base de login)
+├── login.js            # Lógica de autenticação
+├── freemium.html       # Dashboard do plano Gratuito
+├── freemium.js         # Lógica do plano Gratuito
+├── premium.html        # Dashboard do plano Pago (IA e Chat)
+├── premium.js          # Lógica complexa (Socket.IO, Histórico, IA)
+├── admin.html          # Painel Administrativo
+├── admin.js            # Lógica do Admin (Gráficos, CRUD)
+├── upgrade.html        # Página de Pagamento
+├── upgrade.js          # Lógica da animação do cartão de crédito
+├── script.js           # Scripts globais e utilitários compartilhados
+└── static/
+    ├── style.css       # Estilos globais, animações e overrides
+    └── img/
+        ├── logo.png    # Logotipo do projeto
+        └── favicon.png # Ícone do navegador
 ```
 
-3. Instalar dependências do backend:
+-----
 
-```powershell
-pip install -r .\TCC_Backend\requirements.txt
+## 🚀 Como Executar
+
+Como o frontend é composto por arquivos estáticos (HTML/JS/CSS), você precisa de um servidor HTTP simples para evitar erros de **CORS** (Cross-Origin Resource Sharing) ao conectar com o backend e carregar módulos.
+
+### Pré-requisitos
+
+  * Navegador moderno (Chrome, Edge, Firefox).
+  * Conexão com a internet (para carregar Tailwind, Fonts e Ícones via CDN).
+  * **Backend rodando:** Certifique-se de que o servidor Flask esteja rodando em `http://127.0.0.1:5000`.
+
+### Passo a Passo
+
+1.  **Clone o repositório:**
+
+    ```bash
+    git clone <url-do-repositorio>
+    cd TCC_Frontend
+    ```
+
+2.  **Opção A: Usando Python (Recomendado)**
+    Se você já tem o Python instalado, execute na raiz da pasta:
+
+    ```bash
+    python -m http.server 8000
+    ```
+
+    Acesse: `http://localhost:8000`
+
+3.  **Opção B: Usando VS Code**
+
+      * Instale a extensão **Live Server**.
+      * Clique com o botão direito em `index.html` e selecione **"Open with Live Server"**.
+
+-----
+
+## ⚙️ Configuração
+
+### Conexão com a API
+
+Os arquivos JavaScript (`script.js`, `premium.js`, etc.) possuem uma constante que define o endereço do backend. Caso seu backend mude de porta ou endereço, atualize a seguinte linha nos arquivos JS:
+
+```javascript
+const API_BASE_URL = 'http://127.0.0.1:5000'; // Ajuste conforme necessário
+const SOCKET_URL = 'http://127.0.0.1:5000';   // Para o Chatbot
 ```
 
-4. Inicializar o banco de dados (opcional / recomendado na primeira execução):
+-----
 
-```powershell
-python .\TCC_Backend\init_db.py
-```
+## 📸 Funcionalidades em Destaque
 
-5. Configurar chaves de API (se ainda não tiver chaves configuradas):
+### Animação de Cartão 3D (`upgrade.js`)
 
-```powershell
-python .\TCC_Backend\setup_keys.py
-```
+Na tela de Upgrade, ao preencher o CVV, o cartão virtual gira 180 graus para mostrar o verso, utilizando `perspective` e `transform: rotateY` do CSS.
 
-Nota: você também pode adicionar chaves manualmente usando `api_key_manager.APIKeyManager()` conforme comentários em `app.py`.
+### Sistema de Notificações (`showNotification`)
 
-**Executando o backend**
-- No PowerShell com o ambiente ativo, rode:
+Um sistema de "Toasts" personalizado (sem bibliotecas externas) foi implementado para feedbacks de erro e sucesso, aparecendo no canto superior direito com animações de entrada e saída.
 
-```powershell
-python .\TCC_Backend\app.py
-```
+### Chatbot com Socket.IO
 
-O servidor inicia com Socket.IO e estará acessível em `http://localhost:5000` por padrão.
+O chat não utiliza requisições HTTP comuns (polling), mas sim **WebSockets**, garantindo que a resposta da IA apareça letra por letra ou instantaneamente sem recarregar a página.
 
-**Executando o frontend**
-- O frontend é estático. Para desenvolvimento rápido, abra `TCC_frontend\index.html` no navegador.
-- Para servir os arquivos via HTTP (evita problemas de CORS ao testar localmente), rode:
+-----
 
-```powershell
-python -m http.server 8000 --directory .\TCC_frontend
+### Autor
 
-# então abra http://localhost:8000
-```
-
-Observação: o backend já tem CORS habilitado (`CORS(app, origins="*", supports_credentials=True)`), portanto chamadas do frontend não devem ser bloqueadas.
-
-**Endpoints e eventos importantes**
-- `GET /` — rota principal (status simples)
-- `GET /api/keys/status` — retorna status das chaves (uso administrativo; proteja em produção)
-- `POST /api/keys/rotate` — força rotação de chave (administrativo)
-- Socket.IO events:
-  - `connect` — inicia conexão e sessão de chat
-  - `enviar_mensagem` — evento para enviar mensagem do cliente ao bot (payload: `{ mensagem: "texto" }`)
-  - `nova_mensagem` — evento enviado pelo servidor com resposta do bot
-
-**Notas de segurança / produção**
-- Nunca exponha suas chaves de API em repositórios públicos.
-- Em produção, proteja rotas administrativas (`/api/keys/*`) com autenticação apropriada.
-- Considere armazenar `repensei.db` em local seguro e fazer backups regulares.
-
-**Testes rápidos**
-- Inicialize o backend: `python .\TCC_Backend\app.py`.
-- Abra o frontend ou rode o servidor HTTP, acesse `index.html` e teste o chat.
-
-**Contato e autor**
-- Projeto: Repensei
-- Autores: 
-
----
+Adicionar dps

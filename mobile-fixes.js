@@ -275,5 +275,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 250);
     });
     
-    console.log('✅ Correções mobile aplicadas com sucesso!');
+
 });

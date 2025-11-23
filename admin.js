@@ -1,6 +1,5 @@
 /**
  * Exibe uma notificação na tela.
- * (Função showNotification permanece a mesma...)
  */
 function showNotification(message, type = 'success') {
     let container = document.getElementById('notification-container');
@@ -53,12 +52,12 @@ const API_BASE_URL = 'http://127.0.0.1:5000';
 let chartPlano = null;
 let chartQuizzes = null; 
 
-// --- Estado dos Filtros ---
+// Estado dos Filtros
 let currentSearch = '';
 let currentPlano = '';
 let debounceTimer;
 
-// --- Verificação de Sessão (Real) ---
+// Verificação de Sessão
 document.addEventListener('DOMContentLoaded', () => {
     checkAdminSession(); 
     
@@ -86,6 +85,7 @@ async function checkAdminSession() {
         loadAlunosTable();
 
     } catch (error) {
+        console.error('Erro ao verificar sessão:', error);
         showNotification("Você não está logado como admin. Redirecionando...", 'error');
         setTimeout(() => {
             window.location.href = 'login.html'; 
@@ -102,12 +102,12 @@ async function handleLogout() {
     } catch (error) {
         console.error("Erro ao fazer logout:", error);
     } finally {
-        sessionStorage.removeItem('currentAdmin'); 
+        sessionStorage.clear();
         window.location.href = 'login.html'; 
     }
 }
 
-// --- Navegação das Telas ---
+// Navegação das Telas
 function setupMenuLinks() {
     document.querySelectorAll('.admin-menu-link').forEach(link => {
         link.addEventListener('click', (e) => {
@@ -120,11 +120,18 @@ function setupMenuLinks() {
 
             document.querySelectorAll('.admin-menu-link').forEach(l => l.classList.remove('bg-purple-900'));
             link.classList.add('bg-purple-900');
+            
+            // Recarrega dados ao trocar de tela
+            if (targetId === 'dashboard') {
+                loadDashboardData();
+            } else if (targetId === 'alunos') {
+                loadAlunosTable();
+            }
         });
     });
 }
 
-// --- Carregamento de Dados (Real) ---
+// Carregamento de Dados
 async function loadDashboardData() {
     try {
         const response = await fetch(`${API_BASE_URL}/admin/stats`, {
@@ -141,24 +148,20 @@ async function loadDashboardData() {
         document.getElementById('statMediaSociologia').textContent = data.media_sociologia;
 
         // Gráfico 1: Alunos por Plano
-        const planoLabels = data.alunos_por_plano.map(p => p.plano);
-        const planoData = data.alunos_por_plano.map(p => p.count);
-        renderChartPlanos(planoLabels, planoData);
+        renderChartPlanos(
+            data.alunos_por_plano.map(p => p.plano),
+            data.alunos_por_plano.map(p => p.count)
+        );
 
-        // ===============================================
-        // --- INÍCIO DA MUDANÇA (Chamada do Gráfico) ---
-        // ===============================================
-        // Renderiza o novo gráfico de barras AGRUPADO
+        // Gráfico 2: Quizzes por Tema e Plano
         renderChartQuizzesGrouped(
             data.quizzes_por_plano_e_tema.labels,
             data.quizzes_por_plano_e_tema.data_filosofia,
             data.quizzes_por_plano_e_tema.data_sociologia
         );
-        // ===============================================
-        // --- FIM DA MUDANÇA ---
-        // ===============================================
 
     } catch (error) {
+        console.error('Erro ao carregar dashboard:', error);
         showNotification(error.message, 'error');
     }
 }
@@ -189,7 +192,7 @@ async function loadAlunosTable() {
 
         alunos.forEach(aluno => {
             const tr = document.createElement('tr');
-            tr.className = 'border-b border-gray-100';
+            tr.className = 'border-b border-gray-100 hover:bg-gray-50 transition';
             
             const mediaFilo = aluno.media_filosofia ? (aluno.media_filosofia * 100).toFixed(0) + '%' : 'N/A';
             const mediaSocio = aluno.media_sociologia ? (aluno.media_sociologia * 100).toFixed(0) + '%' : 'N/A';
@@ -216,13 +219,13 @@ async function loadAlunosTable() {
                 <td class="p-4 text-gray-700 font-medium">${mediaSocio}</td>
                 <td class="p-4 text-gray-700 font-bold">${mediaGeral}</td>
                 <td class="p-4 text-gray-700">
-                    <button class="text-blue-500 hover:text-blue-700 p-1" data-action="resultados" data-id="${aluno.id_aluno}" data-nome="${aluno.nome}">
+                    <button class="text-blue-500 hover:text-blue-700 p-1" data-action="resultados" data-id="${aluno.id_aluno}" data-nome="${aluno.nome}" title="Ver Resultados">
                         <span class="material-icons text-lg">bar_chart</span>
                     </button>
-                    <button class="text-purple-500 hover:text-purple-700 p-1" data-action="editar" data-id="${aluno.id_aluno}">
+                    <button class="text-purple-500 hover:text-purple-700 p-1" data-action="editar" data-id="${aluno.id_aluno}" title="Editar">
                         <span class="material-icons text-lg">edit</span>
                     </button>
-                    <button class="text-red-500 hover:text-red-700 p-1" data-action="excluir" data-id="${aluno.id_aluno}">
+                    <button class="text-red-500 hover:text-red-700 p-1" data-action="excluir" data-id="${aluno.id_aluno}" title="Excluir">
                         <span class="material-icons text-lg">delete</span>
                     </button>
                 </td>
@@ -235,12 +238,13 @@ async function loadAlunosTable() {
             tabelaBody.appendChild(tr);
         });
     } catch (error) {
+        console.error('Erro ao carregar alunos:', error);
         showNotification(error.message, 'error');
         tabelaBody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-red-500">Erro ao carregar alunos.</td></tr>`;
     }
 }
 
-// --- Lógica dos Filtros ---
+// Lógica dos Filtros
 function setupFilters() {
     const searchInput = document.getElementById('searchInput');
     const filterPlano = document.getElementById('filterPlano');
@@ -259,7 +263,7 @@ function setupFilters() {
     });
 }
 
-// --- Lógica dos Modais (Real) ---
+// Lógica dos Modais
 function setupModalButtons() {
     const modal = document.getElementById('modalAluno');
     const btnNovo = document.getElementById('btnNovoAluno');
@@ -343,6 +347,7 @@ async function handleSalvarAluno() {
         loadDashboardData(); 
 
     } catch (error) {
+        console.error('Erro ao salvar aluno:', error);
         showNotification(error.message, 'error');
     } finally {
         btnSalvar.disabled = false;
@@ -372,6 +377,7 @@ async function handleExcluirAluno(id) {
         loadDashboardData(); 
 
     } catch (error) {
+        console.error('Erro ao excluir aluno:', error);
         showNotification(error.message, 'error');
     }
 }
@@ -421,22 +427,27 @@ async function openModalResultados(id, nome) {
         });
 
     } catch (error) {
+        console.error('Erro ao carregar resultados:', error);
         container.innerHTML = `<p class="text-red-500 text-center">${error.message}</p>`;
         showNotification(error.message, 'error');
     }
 }
 
-
-// --- Funções dos Gráficos (Chart.js) ---
-
+// Funções dos Gráficos (Chart.js)
 function renderChartPlanos(labels, data) {
-    const ctx = document.getElementById('chartAlunosPlano').getContext('2d');
+    const ctx = document.getElementById('chartAlunosPlano');
+    if (!ctx) {
+        console.error('Canvas chartAlunosPlano não encontrado');
+        return;
+    }
+    
     if (chartPlano) {
         chartPlano.destroy(); 
     }
+    
     const backgroundColors = labels.map(label => {
-        if (label === 'premium') return 'rgba(234, 179, 8, 0.7)'; // Yellow
-        if (label === 'freemium') return 'rgba(59, 130, 246, 0.7)'; // Blue
+        if (label === 'premium') return 'rgba(234, 179, 8, 0.7)';
+        if (label === 'freemium') return 'rgba(59, 130, 246, 0.7)';
         return 'rgba(168, 85, 247, 0.7)'; 
     });
     const borderColors = labels.map(label => {
@@ -445,7 +456,7 @@ function renderChartPlanos(labels, data) {
         return 'rgba(168, 85, 247, 1)';
     });
 
-    chartPlano = new Chart(ctx, {
+    chartPlano = new Chart(ctx.getContext('2d'), {
         type: 'pie',
         data: {
             labels: labels,
@@ -459,37 +470,42 @@ function renderChartPlanos(labels, data) {
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: 'top' } }
+            plugins: { 
+                legend: { 
+                    position: 'top' 
+                }
+            }
         }
     });
 }
 
-// ===============================================
-// --- INÍCIO DA MUDANÇA (Função do Gráfico) ---
-// ===============================================
-
-// Função ATUALIZADA para renderizar o gráfico de BARRAS AGRUPADO
 function renderChartQuizzesGrouped(labels, dataFilosofia, dataSociologia) {
-    const ctx = document.getElementById('chartQuizzesGrouped').getContext('2d'); // ID ATUALIZADO
-     if (chartQuizzes) {
+    const ctx = document.getElementById('chartQuizzesGrouped');
+    if (!ctx) {
+        console.error('Canvas chartQuizzesGrouped não encontrado');
+        return;
+    }
+    
+    if (chartQuizzes) {
         chartQuizzes.destroy();
     }
-    chartQuizzes = new Chart(ctx, {
+    
+    chartQuizzes = new Chart(ctx.getContext('2d'), {
         type: 'bar', 
         data: {
-            labels: labels, // ['freemium', 'premium']
+            labels: labels,
             datasets: [
                 {
                     label: 'Filosofia',
-                    data: dataFilosofia, // [filo_free, filo_prem]
-                    backgroundColor: 'rgba(59, 130, 246, 0.7)', // Azul (cor do card)
+                    data: dataFilosofia,
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
                     borderColor: 'rgba(59, 130, 246, 1)',
                     borderWidth: 1
                 },
                 {
                     label: 'Sociologia',
-                    data: dataSociologia, // [socio_free, socio_prem]
-                    backgroundColor: 'rgba(236, 72, 153, 0.7)', // Rosa/Pink (cor do card)
+                    data: dataSociologia,
+                    backgroundColor: 'rgba(236, 72, 153, 0.7)',
                     borderColor: 'rgba(236, 72, 153, 1)',
                     borderWidth: 1
                 }
@@ -508,13 +524,10 @@ function renderChartQuizzesGrouped(labels, dataFilosofia, dataSociologia) {
             },
             plugins: {
                 legend: {
-                    display: true, // Mostra a legenda (Filosofia / Sociologia)
+                    display: true,
                     position: 'top'
                 }
             }
         }
     });
 }
-// ===============================================
-// --- FIM DA MUDANÇA ---
-// ===============================================

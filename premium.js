@@ -81,7 +81,7 @@ let currentUser = {
     id: null,
     nome: 'Visitante',
     plano: 'premium',
-    fotoUrl: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
+    fotoUrl: 'static/img/ft_perfil.png'
 };
 
 // --- Funções de UI (Sidebar, Telas, etc. - Mantidas Globais ou Como Estavam) ---
@@ -317,7 +317,7 @@ function checkLoginStatus() {
         nome: userData.nome,
         email: userData.email,
         plano: userData.plano,
-        fotoUrl: userData.url_foto || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
+        fotoUrl: userData.url_foto || 'static/img/ft_perfil.png'
     };
 
     if (currentUser.plano !== 'premium') {
@@ -360,13 +360,13 @@ function handleLogout() {
 function updateProfileDisplay() {
     if(document.getElementById('profileNome')) document.getElementById('profileNome').textContent = currentUser.nome || 'Seu Nome';
     if(document.getElementById('profileEmail')) document.getElementById('profileEmail').textContent = currentUser.email || 'seuemail@email.com';
-    if(document.getElementById('profileFoto')) document.getElementById('profileFoto').src = currentUser.fotoUrl || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+    if(document.getElementById('profileFoto')) document.getElementById('profileFoto').src = currentUser.fotoUrl || 'static/img/ft_perfil.png';
 }
 
 window.abrirEditarPerfil = function () {
     if(!document.getElementById('modalEditarPerfil')) return; // Verifica se o modal existe
     document.getElementById('editFotoUrl').value = currentUser.fotoUrl || '';
-    document.getElementById('editFotoPreview').src = currentUser.fotoUrl || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+    document.getElementById('editFotoPreview').src = currentUser.fotoUrl || 'static/img/ft_perfil.png';
     document.getElementById('editNome').value = currentUser.nome;
     document.getElementById('editEmail').value = currentUser.email;
     document.getElementById('editSenha').value = '';
@@ -938,7 +938,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editFotoUrlInput = document.getElementById('editFotoUrl');
     if (editFotoUrlInput) editFotoUrlInput.addEventListener('input', (e) => {
         const imgPreview = document.getElementById('editFotoPreview');
-        imgPreview.src = e.target.value || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+        imgPreview.src = e.target.value || 'static/img/ft_perfil.png';
     });
 
 

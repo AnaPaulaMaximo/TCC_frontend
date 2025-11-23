@@ -88,7 +88,7 @@ let currentUser = {
     nome: 'Visitante',
     email: 'Faça login para continuar',
     plano: 'freemium', // Plano padrão
-    fotoUrl: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
+    fotoUrl: 'static/img/ft_perfil.png'
 };
 
 // Função para remover caracteres Markdown--------------------------------------------------------------------------------------------------
@@ -237,7 +237,7 @@ function updateAuthButton() {
 // Função de Logout
 function handleLogout() {
     sessionStorage.removeItem('currentUser');
-    currentUser = { id: null, nome: 'Visitante', email: 'Faça login para continuar', plano: 'freemium', fotoUrl: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' };
+    currentUser = { id: null, nome: 'Visitante', email: 'Faça login para continuar', plano: 'freemium', fotoUrl: 'static/img/ft_perfil.png' };
     updateUIForPlan();
     showTela('inicio');
     showNotification('Você foi desconectado!'); // Sucesso (padrão)
@@ -253,10 +253,10 @@ function loadUserFromSession() {
             nome: userData.nome,
             email: userData.email,
             plano: userData.plano,
-            fotoUrl: userData.url_foto || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
+            fotoUrl: userData.url_foto || 'static/img/ft_perfil.png'
         };
     } else {
-        currentUser = { id: null, nome: 'Visitante', email: 'Faça login para continuar', plano: 'freemium', fotoUrl: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' };
+        currentUser = { id: null, nome: 'Visitante', email: 'Faça login para continuar', plano: 'freemium', fotoUrl: 'static/img/ft_perfil.png' };
     }
     updateUIForPlan();
 }
@@ -278,7 +278,7 @@ window.fecharCriarConta = function () {
 // Funções para Edição de Perfil
 window.abrirEditarPerfil = function () {
     document.getElementById('editFotoUrl').value = currentUser.fotoUrl || '';
-    document.getElementById('editFotoPreview').src = currentUser.fotoUrl || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+    document.getElementById('editFotoPreview').src = currentUser.fotoUrl || 'static/img/ft_perfil.png';
     document.getElementById('editNome').value = currentUser.nome;
     document.getElementById('editEmail').value = currentUser.email;
     document.getElementById('editSenha').value = '';
@@ -292,7 +292,7 @@ window.fecharEditarPerfil = function () {
 function updateProfileDisplay() {
     document.getElementById('profileNome').textContent = currentUser.nome || 'Seu Nome';
     document.getElementById('profileEmail').textContent = currentUser.email || 'seuemail@email.com';
-    document.getElementById('profileFoto').src = currentUser.fotoUrl || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+    document.getElementById('profileFoto').src = currentUser.fotoUrl || 'static/img/ft_perfil.png';
 }
 
 
@@ -482,7 +482,7 @@ document.getElementById('entrarBtn').addEventListener('click', async () => {
         if (url) {
             imgPreview.src = url;
         } else {
-            imgPreview.src = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+            imgPreview.src = 'static/img/ft_perfil.png';
         }
     });
 

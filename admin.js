@@ -201,7 +201,7 @@ async function loadAlunosTable() {
             tr.innerHTML = `
                 <td class="p-4">
                     <div class="flex items-center gap-3">
-                        <img src="${aluno.url_foto || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'}" alt="Foto" class="w-10 h-10 rounded-full object-cover">
+                        <img src="${aluno.url_foto || 'static/img/ft_perfil.png'}" alt="Foto" class="w-10 h-10 rounded-full object-cover">
                         <div>
                             <p class="font-semibold text-gray-800">${aluno.nome}</p>
                             <span class="text-xs text-gray-500">ID: ${aluno.id_aluno}</span>

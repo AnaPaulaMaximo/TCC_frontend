@@ -82,7 +82,7 @@ let currentUser = {
     id: null,
     nome: 'Visitante',
     plano: 'freemium',
-    fotoUrl: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
+    fotoUrl: 'static/img/ft_perfil.png'
 };
 
 // --- Funções de UI (Sidebar, Telas, etc.) ---
@@ -170,7 +170,7 @@ function checkLoginStatus() {
         nome: userData.nome,
         email: userData.email,
         plano: userData.plano,
-        fotoUrl: userData.url_foto || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
+        fotoUrl: userData.url_foto || 'static/img/ft_perfil.png'
     };
 
     // Se for premium, redireciona para a página premium
@@ -206,13 +206,13 @@ function handleLogout() {
 function updateProfileDisplay() {
     document.getElementById('profileNome').textContent = currentUser.nome || 'Seu Nome';
     document.getElementById('profileEmail').textContent = currentUser.email || 'seuemail@email.com';
-    document.getElementById('profileFoto').src = currentUser.fotoUrl || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+    document.getElementById('profileFoto').src = currentUser.fotoUrl || 'static/img/ft_perfil.png';
 }
 
 // Funções de Edição de Perfil
 window.abrirEditarPerfil = function () {
     document.getElementById('editFotoUrl').value = currentUser.fotoUrl || '';
-    document.getElementById('editFotoPreview').src = currentUser.fotoUrl || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+    document.getElementById('editFotoPreview').src = currentUser.fotoUrl || 'static/img/ft_perfil.png';
     document.getElementById('editNome').value = currentUser.nome;
     document.getElementById('editEmail').value = currentUser.email;
     document.getElementById('editSenha').value = '';
@@ -401,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Preview da foto no modal de edição
     document.getElementById('editFotoUrl').addEventListener('input', (e) => {
         const imgPreview = document.getElementById('editFotoPreview');
-        imgPreview.src = e.target.value || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+        imgPreview.src = e.target.value || 'static/img/ft_perfil.png';
     });
 
     // --- Lógica de Flashcards (Freemium) ---

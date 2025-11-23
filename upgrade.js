@@ -63,8 +63,11 @@ function showWelcomePremiumModal() {
     modal.className = 'fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-60 p-4';
     modal.style.animation = 'fadeIn 0.3s ease-out';
     
+    // CORREÇÃO 1: Adicionado max-h-[90vh] e overflow-y-auto para evitar que o modal ultrapasse a tela
     modal.innerHTML = `
-        <div class="bg-gradient-to-br from-purple-600 to-pink-500 rounded-3xl p-8 max-w-2xl w-full shadow-2xl transform" style="animation: modalSlideIn 0.4s ease-out;">
+        <div class="bg-gradient-to-br from-purple-600 to-pink-500 rounded-3xl p-8 max-w-2xl w-full shadow-2xl transform max-h-[90vh] overflow-y-auto" style="animation: modalSlideIn 0.4s ease-out;">
+
+
             <div class="text-center mb-6">
                 <div class="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-4">
                     <span class="material-icons text-white text-5xl">workspace_premium</span>
@@ -175,22 +178,25 @@ function showWelcomePremiumModal() {
     
     document.body.appendChild(modal);
     
-    // Evento do botão de fechar
-    document.getElementById('closeWelcomeModal').addEventListener('click', () => {
+    // Função para fechar e redirecionar
+    const closeAndRedirect = () => {
         modal.style.animation = 'fadeOut 0.3s ease-out';
         setTimeout(() => {
             modal.remove();
-            // Redireciona para a página premium
             window.location.href = 'premium.html';
         }, 300);
-    });
+    };
+
+    // Eventos dos botões de fechar
+    document.getElementById('closeWelcomeModal').addEventListener('click', closeAndRedirect);
+    document.getElementById('closeWelcomeModalX').addEventListener('click', closeAndRedirect);
 }
 
 /**
  * Processa o upgrade do usuário
  */
 async function processarUpgrade() {
-    const API_BASE_URL = 'http://127.0.0.1:5000';
+    const API_BASE_URL = 'http://127.0.0.1:5000'; // URL do seu backend
     
     // Mostra loading no botão
     const submitBtn = document.querySelector('#paymentForm button[type="submit"]');
@@ -213,25 +219,15 @@ async function processarUpgrade() {
         const userData = JSON.parse(storedUser);
         const id_aluno = userData.id_aluno;
         
-        // Verifica se já é premium
-        if (userData.plano === 'premium') {
-            showNotification("Você já é um usuário Premium!", 'error');
-            setTimeout(() => {
-                window.location.href = 'premium.html';
-            }, 2000);
-            return;
-        }
-        
-        // CORREÇÃO: Envia TODOS os campos necessários, incluindo plano
+        // CORREÇÃO 3: Envia TODOS os campos necessários, incluindo plano
         const updateData = {
             nome: userData.nome,
             email: userData.email,
             url_foto: userData.url_foto || '',
-            plano: 'premium'  // Campo principal para atualização
+            plano: 'premium'  // Campo fundamental que deve ser salvo no backend
         };
         
         console.log('Enviando upgrade para:', `${API_BASE_URL}/auth/editar_usuario/${id_aluno}`);
-        console.log('Dados enviados:', updateData);
         
         const response = await fetch(`${API_BASE_URL}/auth/editar_usuario/${id_aluno}`, {
             method: 'PUT',
@@ -243,18 +239,7 @@ async function processarUpgrade() {
             credentials: 'include'
         });
         
-        console.log('Status da resposta:', response.status);
-        
-        // Tenta pegar o JSON da resposta
-        let data;
-        try {
-            data = await response.json();
-        } catch (e) {
-            console.error('Erro ao parsear JSON:', e);
-            throw new Error('Resposta inválida do servidor');
-        }
-        
-        console.log('Resposta do servidor:', data);
+        const data = await response.json();
         
         if (!response.ok) {
             throw new Error(data.error || `Erro HTTP ${response.status}`);
@@ -264,21 +249,22 @@ async function processarUpgrade() {
         userData.plano = 'premium';
         sessionStorage.setItem('currentUser', JSON.stringify(userData));
         
-        console.log('✅ Plano atualizado no sessionStorage');
+        console.log('✅ Plano atualizado no sessionStorage e no Backend');
         
-        // Verifica se é a primeira vez que vira Premium
-        const hasSeenWelcome = localStorage.getItem('hasSeenPremiumWelcome');
+        // CORREÇÃO 2: Lógica de "Já Viu" vinculada ao ID do usuário
+        const storageKey = `hasSeenPremiumWelcome_${id_aluno}`;
+        const hasSeenWelcome = localStorage.getItem(storageKey);
         
         if (!hasSeenWelcome) {
-            // Marca que já viu a mensagem
-            localStorage.setItem('hasSeenPremiumWelcome', 'true');
-            console.log('🎉 Primeira vez Premium - mostrando modal');
+            // Marca que ESTE usuário já viu
+            localStorage.setItem(storageKey, 'true');
+            console.log('🎉 Primeira vez Premium (Conta Nova) - mostrando modal');
             
             // Mostra o modal de boas-vindas
             showWelcomePremiumModal();
         } else {
-            // Não é a primeira vez, apenas redireciona
-            console.log('✨ Upgrade repetido - redirecionando direto');
+            // Não é a primeira vez para este usuário, apenas redireciona
+            console.log('✨ Upgrade repetido (Mesma Conta) - redirecionando direto');
             showNotification('Upgrade realizado com sucesso!');
             setTimeout(() => {
                 window.location.href = 'premium.html';
@@ -289,13 +275,13 @@ async function processarUpgrade() {
         console.error('❌ Erro ao fazer upgrade:', error);
         showNotification(`Erro ao processar o upgrade: ${error.message}`, 'error');
         
-        // Restaura o botão
+        // Restaura o botão em caso de erro
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
     }
 }
 
-// Lógica original do cartão (mantida intacta)
+// Lógica original do cartão e inicialização
 document.addEventListener('DOMContentLoaded', () => {
     const cardNumberInput = document.getElementById('cardNumber');
     const cardNameInput = document.getElementById('cardName');
@@ -309,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const displayCardCVC = document.getElementById('display-cvc');
     const paymentForm = document.getElementById('paymentForm');
 
-    // Funções de formatação do cartão (mantidas iguais)
+    // Funções de formatação do cartão
     cardNumberInput.addEventListener('input', (e) => {
         let value = e.target.value.replace(/\D/g, '');
         value = value.match(/.{1,4}/g)?.join(' ') || '';
@@ -345,15 +331,15 @@ document.addEventListener('DOMContentLoaded', () => {
         displayCardCVC.textContent = value || '***';
     });
 
-    // MODIFICAÇÃO: Agora processa o upgrade sem validar campos
+    // Intercepta o envio do formulário para fazer o upgrade "falso" (sem validar cartão real)
     paymentForm.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        // Remove validação dos campos - permite enviar sem preencher
+        // Chama a função de upgrade sem validar os campos do cartão
         processarUpgrade();
     });
 
-    // Lógica de seleção de plano (mantida igual)
+    // Lógica de seleção de plano
     const radioMensal = document.getElementById('plan-mensal');
     const radioAnual = document.getElementById('plan-anual');
     

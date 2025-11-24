@@ -534,15 +534,20 @@ async function fetchHistorico() {
             }
 
             card.innerHTML = `
-                <div class="flex items-center gap-4">
-                    <span class="material-icons text-pink-300 text-2xl">${icon}</span>
-                    <div>
-                        <p class="font-semibold text-base">${title}</p>
-                        <p class="text-sm text-white/80">${details}</p>
-                    </div>
-                </div>
-                <span class="material-icons text-white/70">chevron_right</span>
-            `;
+    <div class="w-full flex items-center justify-between">
+        
+        <div class="flex items-center gap-4">
+            <span class="material-icons text-pink-300 text-2xl">${icon}</span>
+            <div>
+                <p class="font-semibold text-base">${title}</p>
+                <p class="text-sm text-white/80">${details}</p>
+            </div>
+        </div>
+
+        <span class="material-icons text-white/70">chevron_right</span>
+
+    </div>
+`;
             container.appendChild(card);
         });
 

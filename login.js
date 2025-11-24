@@ -1,7 +1,6 @@
 /**
- * Exibe uma notificação na tela.
- * A função cria automaticamente o container de notificações se ele não existir.
- *
+ * NOTIFICAÇÃO.
+ 
  * @param {string} message - A mensagem a ser exibida.
  * @param {string} [type='success'] - O tipo de notificação ('success' ou 'error').
  */
@@ -72,7 +71,7 @@ function showNotification(message, type = 'success') {
         });
     });
 }
-
+//-------------------------------------------------------------------------------
 
 // URL da sua API refatorada (porta 5002)
 const API_BASE_URL = 'http://127.0.0.1:5000';

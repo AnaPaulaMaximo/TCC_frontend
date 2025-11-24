@@ -1,52 +1,3 @@
-/**
- * Exibe uma notificação na tela.
- */
-function showNotification(message, type = 'success') {
-    let container = document.getElementById('notification-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'notification-container';
-        container.className = 'fixed top-8 right-8 z-[9999] flex flex-col gap-3';
-        document.body.appendChild(container);
-    }
-    const isError = type === 'error';
-    const iconName = isError ? 'error' : 'check_circle';
-    const iconColor = isError ? 'text-red-600' : 'text-purple-600';
-    const title = isError ? 'Ocorreu um Erro' : 'Sucesso!';
-    const toast = document.createElement('div');
-    toast.className = 'flex items-start gap-3 w-full max-w-sm p-4 bg-white rounded-xl shadow-lg border border-gray-200 notification-toast-enter';
-    toast.innerHTML = `
-        <div class="flex-shrink-0">
-            <span class="material-icons ${iconColor}" style="font-size: 24px;">${iconName}</span>
-        </div>
-        <div class="flex-1 mr-4">
-            <p class="font-semibold text-gray-900">${title}</p>
-            <p class="text-sm text-gray-600">${message}</p>
-        </div>
-        <div class="flex-shrink-0">
-            <button class="text-gray-400 hover:text-gray-600">
-                <span class="material-icons" style="font-size: 20px;">close</span>
-            </button>
-        </div>
-    `;
-    container.appendChild(toast);
-    const timer = setTimeout(() => {
-        toast.classList.remove('notification-toast-enter');
-        toast.classList.add('notification-toast-exit');
-        toast.addEventListener('animationend', () => {
-            toast.remove();
-        });
-    }, 3000);
-    toast.querySelector('button').addEventListener('click', () => {
-        clearTimeout(timer);
-        toast.classList.remove('notification-toast-enter');
-        toast.classList.add('notification-toast-exit');
-        toast.addEventListener('animationend', () => {
-            toast.remove();
-        });
-    });
-}
-
 const API_BASE_URL = 'http://127.0.0.1:5000';
 
 let chartPlano = null;
@@ -219,20 +170,24 @@ async function loadAlunosTable() {
                 <td class="p-4 text-gray-700 font-medium">${mediaSocio}</td>
                 <td class="p-4 text-gray-700 font-bold">${mediaGeral}</td>
                 <td class="p-4 text-gray-700">
-                    <button class="text-blue-500 hover:text-blue-700 p-1" data-action="resultados" data-id="${aluno.id_aluno}" data-nome="${aluno.nome}" title="Ver Resultados">
+                    <button class="text-blue-500 hover:text-blue-700 p-1" data-action="resultados" title="Ver Resultados">
                         <span class="material-icons text-lg">bar_chart</span>
                     </button>
-                    <button class="text-purple-500 hover:text-purple-700 p-1" data-action="editar" data-id="${aluno.id_aluno}" title="Editar">
+                    <button class="text-purple-500 hover:text-purple-700 p-1" data-action="editar" title="Editar">
                         <span class="material-icons text-lg">edit</span>
                     </button>
-                    <button class="text-red-500 hover:text-red-700 p-1" data-action="excluir" data-id="${aluno.id_aluno}" title="Excluir">
+                    <button class="text-red-500 hover:text-red-700 p-1" data-action="excluir" title="Excluir">
                         <span class="material-icons text-lg">delete</span>
                     </button>
                 </td>
             `;
 
+            // Adiciona Event Listeners
             tr.querySelector('[data-action="editar"]').addEventListener('click', () => openModalEdit(aluno));
-            tr.querySelector('[data-action="excluir"]').addEventListener('click', () => handleExcluirAluno(aluno.id_aluno));
+            
+            // --- MUDANÇA AQUI: Passamos aluno.id_aluno E aluno.nome ---
+            tr.querySelector('[data-action="excluir"]').addEventListener('click', () => handleExcluirAluno(aluno.id_aluno, aluno.nome));
+            
             tr.querySelector('[data-action="resultados"]').addEventListener('click', () => openModalResultados(aluno.id_aluno, aluno.nome));
             
             tabelaBody.appendChild(tr);
@@ -355,31 +310,40 @@ async function handleSalvarAluno() {
     }
 }
 
-async function handleExcluirAluno(id) {
-    if (!confirm(`Você tem certeza que deseja excluir o aluno ID ${id}? Esta ação não pode ser desfeita.`)) {
-        return;
-    }
+// ---------------------------------------------------------
+// FUNÇÃO DE EXCLUSÃO (ATUALIZADA COM O NOME)
+// ---------------------------------------------------------
+async function handleExcluirAluno(id, nome) {
+    // Usamos o 'nome' no texto para ficar mais bonito
+    showConfirmModal(
+        `Tem certeza que deseja remover o aluno <b>${nome}</b>?<br>Esta ação não pode ser desfeita.`, 
+        async () => {
+            try {
+                // Mas usamos o 'id' para apagar no banco de dados
+                const response = await fetch(`${API_BASE_URL}/admin/alunos/${id}`, { 
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch(e) {}
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/admin/alunos/${id}`, {
-            method: 'DELETE',
-            credentials: 'include'
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || 'Erro ao excluir aluno.');
-        }
-        
-        showNotification(data.message, 'success');
-        loadAlunosTable(); 
-        loadDashboardData(); 
-
-    } catch (error) {
-        console.error('Erro ao excluir aluno:', error);
-        showNotification(error.message, 'error');
-    }
+                if (response.ok) {
+                    showNotification('Aluno removido com sucesso!', 'success');
+                    loadAlunosTable(); 
+                    loadDashboardData();
+                } else {
+                    showNotification(data.error || 'Erro ao remover aluno.', 'error');
+                }
+            } catch (error) {
+                console.error('Erro de rede:', error);
+                showNotification('Erro de conexão ao tentar excluir.', 'error');
+            }
+        },
+        'Confirmar Exclusão'
+    );
 }
 
 async function openModalResultados(id, nome) {
@@ -436,14 +400,9 @@ async function openModalResultados(id, nome) {
 // Funções dos Gráficos (Chart.js)
 function renderChartPlanos(labels, data) {
     const ctx = document.getElementById('chartAlunosPlano');
-    if (!ctx) {
-        console.error('Canvas chartAlunosPlano não encontrado');
-        return;
-    }
+    if (!ctx) return;
     
-    if (chartPlano) {
-        chartPlano.destroy(); 
-    }
+    if (chartPlano) chartPlano.destroy(); 
     
     const backgroundColors = labels.map(label => {
         if (label === 'premium') return 'rgba(234, 179, 8, 0.7)';
@@ -470,25 +429,16 @@ function renderChartPlanos(labels, data) {
         },
         options: {
             responsive: true,
-            plugins: { 
-                legend: { 
-                    position: 'top' 
-                }
-            }
+            plugins: { legend: { position: 'top' } }
         }
     });
 }
 
 function renderChartQuizzesGrouped(labels, dataFilosofia, dataSociologia) {
     const ctx = document.getElementById('chartQuizzesGrouped');
-    if (!ctx) {
-        console.error('Canvas chartQuizzesGrouped não encontrado');
-        return;
-    }
+    if (!ctx) return;
     
-    if (chartQuizzes) {
-        chartQuizzes.destroy();
-    }
+    if (chartQuizzes) chartQuizzes.destroy();
     
     chartQuizzes = new Chart(ctx.getContext('2d'), {
         type: 'bar', 
@@ -514,20 +464,122 @@ function renderChartQuizzesGrouped(labels, dataFilosofia, dataSociologia) {
         options: {
             responsive: true,
             scales: {
-                y: { 
-                    beginAtZero: true, 
-                    ticks: { 
-                        stepSize: 1, 
-                        precision: 0 
-                    } 
-                }
+                y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } }
             },
             plugins: {
-                legend: {
-                    display: true,
-                    position: 'top'
-                }
+                legend: { display: true, position: 'top' }
             }
         }
+    });
+}
+
+/* ==========================================================================
+   UTILITÁRIOS: MODAIS E NOTIFICAÇÕES
+   ========================================================================== */
+
+/**
+ * Exibe uma notificação na tela (Toast).
+ */
+function showNotification(message, type = 'success') {
+    let container = document.getElementById('notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notification-container';
+        container.className = 'fixed top-8 right-8 z-[9999] flex flex-col gap-3';
+        document.body.appendChild(container);
+    }
+
+    const isError = type === 'error';
+    const iconName = isError ? 'error' : 'check_circle';
+    const iconColor = isError ? 'text-red-600' : 'text-purple-600';
+    const title = isError ? 'Ocorreu um Erro' : 'Sucesso!';
+
+    const toast = document.createElement('div');
+    toast.className = 'flex items-start gap-3 w-full max-w-sm p-4 bg-white rounded-xl shadow-lg border border-gray-200 animate-fade-in-down'; 
+    
+    toast.style.animation = "slideIn 0.3s ease-out forwards";
+    
+    toast.innerHTML = `
+        <div class="flex-shrink-0">
+            <span class="material-icons ${iconColor}" style="font-size: 24px;">${iconName}</span>
+        </div>
+        <div class="flex-1 mr-4">
+            <p class="font-semibold text-gray-900">${title}</p>
+            <p class="text-sm text-gray-600">${message}</p>
+        </div>
+        <div class="flex-shrink-0">
+            <button class="text-gray-400 hover:text-gray-600 btn-close-toast">
+                <span class="material-icons" style="font-size: 20px;">close</span>
+            </button>
+        </div>
+    `;
+
+    container.appendChild(toast);
+
+    const removeToast = () => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    };
+
+    const timer = setTimeout(removeToast, 4000);
+
+    toast.querySelector('.btn-close-toast').addEventListener('click', () => {
+        clearTimeout(timer);
+        removeToast();
+    });
+}
+
+/**
+ * Exibe um modal de confirmação personalizado.
+ */
+function showConfirmModal(message, onConfirm, title = 'Tem certeza?') {
+    if (document.getElementById('custom-confirm-modal')) return;
+
+    const backdrop = document.createElement('div');
+    backdrop.id = 'custom-confirm-modal';
+    backdrop.className = 'fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+
+    const modal = document.createElement('div');
+    modal.className = 'bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md transform scale-95 transition-all duration-300 border border-gray-100';
+
+    modal.innerHTML = `
+        <div class="flex flex-col items-center text-center">
+            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
+                <span class="material-icons text-red-500" style="font-size: 32px;">warning</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">${title}</h3>
+            <p class="text-gray-600 mb-6 text-sm leading-relaxed">${message}</p>
+            <div class="flex w-full gap-3">
+                <button id="btn-cancel" class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors">Cancelar</button>
+                <button id="btn-confirm" class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-lg shadow-red-200 transition-all">Sim, excluir</button>
+            </div>
+        </div>
+    `;
+
+    backdrop.appendChild(modal);
+    document.body.appendChild(backdrop);
+
+    const closeModal = () => {
+        backdrop.classList.remove('opacity-100');
+        modal.classList.remove('scale-100');
+        modal.classList.add('scale-95');
+        setTimeout(() => { if (backdrop.parentNode) backdrop.parentNode.removeChild(backdrop); }, 300);
+    };
+
+    requestAnimationFrame(() => {
+        backdrop.classList.remove('opacity-0');
+        backdrop.classList.add('opacity-100');
+        modal.classList.remove('scale-95');
+        modal.classList.add('scale-100');
+    });
+
+    modal.querySelector('#btn-cancel').addEventListener('click', closeModal);
+    backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+
+    modal.querySelector('#btn-confirm').addEventListener('click', () => {
+        onConfirm(); 
+        closeModal();
     });
 }

@@ -17,7 +17,51 @@ document.addEventListener('DOMContentLoaded', () => {
     setupMenuLinks();
     setupModalButtons();
     setupFilters();
+    setupMobileSidebar(); // Nova função para menu responsivo
 });
+
+// ===== NOVA FUNCIONALIDADE: MENU LATERAL RESPONSIVO =====
+function setupMobileSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('menuOverlay');
+    const openBtn = document.getElementById('openSidebarBtn');
+    const closeBtn = document.getElementById('closeSidebarBtn');
+    
+    // Abrir menu
+    openBtn.addEventListener('click', () => {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Previne scroll do body
+    });
+    
+    // Fechar menu
+    const closeSidebar = () => {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+        document.body.style.overflow = ''; // Restaura scroll
+    };
+    
+    closeBtn.addEventListener('click', closeSidebar);
+    overlay.addEventListener('click', closeSidebar);
+    
+    // Fechar menu ao clicar em um link (mobile)
+    document.querySelectorAll('.admin-menu-link').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth < 1024) { // lg breakpoint
+                closeSidebar();
+            }
+        });
+    });
+    
+    // Fechar menu ao redimensionar para desktop
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 1024) {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    });
+}
 
 async function checkAdminSession() {
     try {
@@ -119,7 +163,7 @@ async function loadDashboardData() {
 
 async function loadAlunosTable() {
     const tabelaBody = document.getElementById('tabelaAlunosBody');
-    tabelaBody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-gray-500">Carregando alunos...</td></tr>`;
+    tabelaBody.innerHTML = `<tr><td colspan="8" class="p-6 md:p-8 text-center text-gray-500">Carregando alunos...</td></tr>`;
 
     const url = new URL(`${API_BASE_URL}/admin/alunos`);
     if (currentSearch) {
@@ -137,7 +181,7 @@ async function loadAlunosTable() {
         tabelaBody.innerHTML = ''; 
 
         if (alunos.length === 0) {
-            tabelaBody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-gray-500">Nenhum aluno encontrado.</td></tr>`;
+            tabelaBody.innerHTML = `<tr><td colspan="8" class="p-6 md:p-8 text-center text-gray-500">Nenhum aluno encontrado.</td></tr>`;
             return;
         }
 
@@ -150,44 +194,42 @@ async function loadAlunosTable() {
             const mediaGeral = aluno.media_geral ? (aluno.media_geral * 100).toFixed(0) + '%' : 'N/A';
             
             tr.innerHTML = `
-                <td class="p-4">
-                    <div class="flex items-center gap-3">
-                        <img src="${aluno.url_foto || 'static/img/ft_perfil.png'}" alt="Foto" class="w-10 h-10 rounded-full object-cover">
+                <td class="p-2 md:p-4">
+                    <div class="flex items-center gap-2 md:gap-3">
+                        <img src="${aluno.url_foto || 'static/img/ft_perfil.png'}" alt="Foto" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover">
                         <div>
-                            <p class="font-semibold text-gray-800">${aluno.nome}</p>
+                            <p class="font-semibold text-gray-800 text-sm md:text-base">${aluno.nome}</p>
                             <span class="text-xs text-gray-500">ID: ${aluno.id_aluno}</span>
                         </div>
                     </div>
                 </td>
-                <td class="p-4 text-gray-700">${aluno.email}</td>
-                <td class="p-4">
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${aluno.plano === 'premium' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}">
+                <td class="p-2 md:p-4 text-gray-700 text-sm md:text-base hidden sm:table-cell">${aluno.email}</td>
+                <td class="p-2 md:p-4">
+                    <span class="px-2 md:px-3 py-1 rounded-full text-xs font-semibold ${aluno.plano === 'premium' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}">
                         ${aluno.plano}
                     </span>
                 </td>
-                <td class="p-4 text-gray-700 font-medium text-center">${aluno.total_quizzes}</td>
-                <td class="p-4 text-gray-700 font-medium">${mediaFilo}</td>
-                <td class="p-4 text-gray-700 font-medium">${mediaSocio}</td>
-                <td class="p-4 text-gray-700 font-bold">${mediaGeral}</td>
-                <td class="p-4 text-gray-700">
-                    <button class="text-blue-500 hover:text-blue-700 p-1" data-action="resultados" title="Ver Resultados">
-                        <span class="material-icons text-lg">bar_chart</span>
-                    </button>
-                    <button class="text-purple-500 hover:text-purple-700 p-1" data-action="editar" title="Editar">
-                        <span class="material-icons text-lg">edit</span>
-                    </button>
-                    <button class="text-red-500 hover:text-red-700 p-1" data-action="excluir" title="Excluir">
-                        <span class="material-icons text-lg">delete</span>
-                    </button>
+                <td class="p-2 md:p-4 text-gray-700 font-medium text-center text-sm md:text-base hidden md:table-cell">${aluno.total_quizzes}</td>
+                <td class="p-2 md:p-4 text-gray-700 font-medium text-sm md:text-base hidden lg:table-cell">${mediaFilo}</td>
+                <td class="p-2 md:p-4 text-gray-700 font-medium text-sm md:text-base hidden lg:table-cell">${mediaSocio}</td>
+                <td class="p-2 md:p-4 text-gray-700 font-bold text-sm md:text-base hidden md:table-cell">${mediaGeral}</td>
+                <td class="p-2 md:p-4">
+                    <div class="flex gap-1">
+                        <button class="text-blue-500 hover:text-blue-700 p-1" data-action="resultados" title="Ver Resultados">
+                            <span class="material-icons text-base md:text-lg">bar_chart</span>
+                        </button>
+                        <button class="text-purple-500 hover:text-purple-700 p-1" data-action="editar" title="Editar">
+                            <span class="material-icons text-base md:text-lg">edit</span>
+                        </button>
+                        <button class="text-red-500 hover:text-red-700 p-1" data-action="excluir" title="Excluir">
+                            <span class="material-icons text-base md:text-lg">delete</span>
+                        </button>
+                    </div>
                 </td>
             `;
 
-            // Adiciona Event Listeners
             tr.querySelector('[data-action="editar"]').addEventListener('click', () => openModalEdit(aluno));
-            
-            // --- MUDANÇA AQUI: Passamos aluno.id_aluno E aluno.nome ---
             tr.querySelector('[data-action="excluir"]').addEventListener('click', () => handleExcluirAluno(aluno.id_aluno, aluno.nome));
-            
             tr.querySelector('[data-action="resultados"]').addEventListener('click', () => openModalResultados(aluno.id_aluno, aluno.nome));
             
             tabelaBody.appendChild(tr);
@@ -195,7 +237,7 @@ async function loadAlunosTable() {
     } catch (error) {
         console.error('Erro ao carregar alunos:', error);
         showNotification(error.message, 'error');
-        tabelaBody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-red-500">Erro ao carregar alunos.</td></tr>`;
+        tabelaBody.innerHTML = `<tr><td colspan="8" class="p-6 md:p-8 text-center text-red-500">Erro ao carregar alunos.</td></tr>`;
     }
 }
 
@@ -310,16 +352,11 @@ async function handleSalvarAluno() {
     }
 }
 
-// ---------------------------------------------------------
-// FUNÇÃO DE EXCLUSÃO (ATUALIZADA COM O NOME)
-// ---------------------------------------------------------
 async function handleExcluirAluno(id, nome) {
-    // Usamos o 'nome' no texto para ficar mais bonito
     showConfirmModal(
         `Tem certeza que deseja remover o aluno <b>${nome}</b>?<br>Esta ação não pode ser desfeita.`, 
         async () => {
             try {
-                // Mas usamos o 'id' para apagar no banco de dados
                 const response = await fetch(`${API_BASE_URL}/admin/alunos/${id}`, { 
                     method: 'DELETE',
                     credentials: 'include'
@@ -352,7 +389,7 @@ async function openModalResultados(id, nome) {
     const container = document.getElementById('listaResultadosContainer');
     
     titulo.textContent = `Resultados de: ${nome}`;
-    container.innerHTML = '<p class="text-gray-500 text-center">Carregando resultados...</p>';
+    container.innerHTML = '<p class="text-gray-500 text-center text-sm md:text-base">Carregando resultados...</p>';
     modal.classList.remove('hidden');
 
     try {
@@ -364,7 +401,7 @@ async function openModalResultados(id, nome) {
         const resultados = await response.json();
         
         if (resultados.length === 0) {
-            container.innerHTML = '<p class="text-gray-500 text-center">Nenhum resultado de quiz encontrado para este aluno.</p>';
+            container.innerHTML = '<p class="text-gray-500 text-center text-sm md:text-base">Nenhum resultado de quiz encontrado para este aluno.</p>';
             return;
         }
 
@@ -374,17 +411,17 @@ async function openModalResultados(id, nome) {
             const perc = res.total_perguntas > 0 ? (res.acertos / res.total_perguntas) * 100 : 0;
             
             const div = document.createElement('div');
-            div.className = 'p-4 border-b border-gray-200';
+            div.className = 'p-3 md:p-4 border-b border-gray-200';
             div.innerHTML = `
                 <div class="flex justify-between items-center mb-1">
-                    <span class="font-semibold text-purple-700">${res.tema}</span>
-                    <span class="font-bold text-lg ${perc >= 70 ? 'text-green-600' : 'text-red-500'}">
+                    <span class="font-semibold text-purple-700 text-sm md:text-base">${res.tema}</span>
+                    <span class="font-bold text-base md:text-lg ${perc >= 70 ? 'text-green-600' : 'text-red-500'}">
                         ${perc.toFixed(0)}%
                     </span>
                 </div>
-                <div class="flex justify-between items-center text-sm text-gray-500">
+                <div class="flex justify-between items-center text-xs md:text-sm text-gray-500">
                     <span>${res.acertos} de ${res.total_perguntas} corretas</span>
-                    <span>${dataFormatada}</span>
+                    <span class="text-xs">${dataFormatada}</span>
                 </div>
             `;
             container.appendChild(div);
@@ -392,7 +429,7 @@ async function openModalResultados(id, nome) {
 
     } catch (error) {
         console.error('Erro ao carregar resultados:', error);
-        container.innerHTML = `<p class="text-red-500 text-center">${error.message}</p>`;
+        container.innerHTML = `<p class="text-red-500 text-center text-sm md:text-base">${error.message}</p>`;
         showNotification(error.message, 'error');
     }
 }
@@ -429,7 +466,17 @@ function renderChartPlanos(labels, data) {
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: 'top' } }
+            maintainAspectRatio: true,
+            plugins: { 
+                legend: { 
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 12
+                        }
+                    }
+                } 
+            }
         }
     });
 }
@@ -463,29 +510,65 @@ function renderChartQuizzesGrouped(labels, dataFilosofia, dataSociologia) {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: true,
             scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } }
+                y: { 
+                    beginAtZero: true, 
+                    ticks: { 
+                        stepSize: 1, 
+                        precision: 0,
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 12
+                        }
+                    } 
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 12
+                        }
+                    }
+                }
             },
             plugins: {
-                legend: { display: true, position: 'top' }
+                legend: { 
+                    display: true, 
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 12
+                        }
+                    }
+                }
             }
         }
     });
 }
 
+// Redimensionar gráficos ao mudar orientação/tamanho da tela
+window.addEventListener('resize', () => {
+    if (chartPlano) {
+        chartPlano.options.plugins.legend.labels.font.size = window.innerWidth < 768 ? 10 : 12;
+        chartPlano.update();
+    }
+    if (chartQuizzes) {
+        chartQuizzes.options.scales.y.ticks.font.size = window.innerWidth < 768 ? 10 : 12;
+        chartQuizzes.options.scales.x.ticks.font.size = window.innerWidth < 768 ? 10 : 12;
+        chartQuizzes.options.plugins.legend.labels.font.size = window.innerWidth < 768 ? 10 : 12;
+        chartQuizzes.update();
+    }
+});
+
 /* ==========================================================================
    UTILITÁRIOS: MODAIS E NOTIFICAÇÕES
    ========================================================================== */
 
-/**
- * Exibe uma notificação na tela (Toast).
- */
 function showNotification(message, type = 'success') {
     let container = document.getElementById('notification-container');
     if (!container) {
         container = document.createElement('div');
         container.id = 'notification-container';
-        container.className = 'fixed top-8 right-8 z-[9999] flex flex-col gap-3';
+        container.className = 'fixed top-4 right-4 z-[9999] flex flex-col gap-3 max-w-sm';
         document.body.appendChild(container);
     }
 
@@ -495,21 +578,21 @@ function showNotification(message, type = 'success') {
     const title = isError ? 'Ocorreu um Erro' : 'Sucesso!';
 
     const toast = document.createElement('div');
-    toast.className = 'flex items-start gap-3 w-full max-w-sm p-4 bg-white rounded-xl shadow-lg border border-gray-200 animate-fade-in-down'; 
+    toast.className = 'flex items-start gap-2 md:gap-3 w-full p-3 md:p-4 bg-white rounded-xl shadow-lg border border-gray-200'; 
     
     toast.style.animation = "slideIn 0.3s ease-out forwards";
     
     toast.innerHTML = `
         <div class="flex-shrink-0">
-            <span class="material-icons ${iconColor}" style="font-size: 24px;">${iconName}</span>
+            <span class="material-icons ${iconColor}" style="font-size: 20px;">${iconName}</span>
         </div>
-        <div class="flex-1 mr-4">
-            <p class="font-semibold text-gray-900">${title}</p>
-            <p class="text-sm text-gray-600">${message}</p>
+        <div class="flex-1 mr-2">
+            <p class="font-semibold text-gray-900 text-sm md:text-base">${title}</p>
+            <p class="text-xs md:text-sm text-gray-600">${message}</p>
         </div>
         <div class="flex-shrink-0">
             <button class="text-gray-400 hover:text-gray-600 btn-close-toast">
-                <span class="material-icons" style="font-size: 20px;">close</span>
+                <span class="material-icons" style="font-size: 18px;">close</span>
             </button>
         </div>
     `;
@@ -531,29 +614,26 @@ function showNotification(message, type = 'success') {
     });
 }
 
-/**
- * Exibe um modal de confirmação personalizado.
- */
 function showConfirmModal(message, onConfirm, title = 'Tem certeza?') {
     if (document.getElementById('custom-confirm-modal')) return;
 
     const backdrop = document.createElement('div');
     backdrop.id = 'custom-confirm-modal';
-    backdrop.className = 'fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+    backdrop.className = 'fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300 p-4';
 
     const modal = document.createElement('div');
-    modal.className = 'bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md transform scale-95 transition-all duration-300 border border-gray-100';
+    modal.className = 'bg-white rounded-2xl shadow-2xl p-4 md:p-6 w-full max-w-md transform scale-95 transition-all duration-300 border border-gray-100';
 
     modal.innerHTML = `
         <div class="flex flex-col items-center text-center">
-            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
-                <span class="material-icons text-red-500" style="font-size: 32px;">warning</span>
+            <div class="w-12 h-12 md:w-16 md:h-16 bg-red-50 rounded-full flex items-center justify-center mb-3 md:mb-4">
+                <span class="material-icons text-red-500" style="font-size: 24px;">warning</span>
             </div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">${title}</h3>
-            <p class="text-gray-600 mb-6 text-sm leading-relaxed">${message}</p>
-            <div class="flex w-full gap-3">
-                <button id="btn-cancel" class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors">Cancelar</button>
-                <button id="btn-confirm" class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-lg shadow-red-200 transition-all">Sim, excluir</button>
+            <h3 class="text-lg md:text-xl font-bold text-gray-900 mb-2">${title}</h3>
+            <p class="text-gray-600 mb-4 md:mb-6 text-xs md:text-sm leading-relaxed">${message}</p>
+            <div class="flex w-full gap-2 md:gap-3">
+                <button id="btn-cancel" class="flex-1 px-3 md:px-4 py-2 md:py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors text-sm md:text-base">Cancelar</button>
+                <button id="btn-confirm" class="flex-1 px-3 md:px-4 py-2 md:py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-lg shadow-red-200 transition-all text-sm md:text-base">Sim, excluir</button>
             </div>
         </div>
     `;

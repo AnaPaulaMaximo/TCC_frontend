@@ -5,17 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - RePensei</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="static/style.css"> <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-   
 </head>
 <body class="bg-purple-50">
 
-    <nav class="w-64 h-screen bg-purple-800 text-white flex flex-col shadow-lg fixed top-0 left-0 z-50">
-        <div class="flex items-center gap-2 justify-center py-6 border-b border-purple-700">
-            <span class="material-icons text-3xl">admin_panel_settings</span>
-            <span class="text-2xl font-bold">RePensei Admin</span>
+    <!-- Botão hamburguer SEMPRE VISÍVEL no topo -->
+    <button id="openSidebarBtn" class="lg:hidden fixed top-4 left-4 z-[100] bg-purple-800 text-white p-3 rounded-lg shadow-2xl hover:bg-purple-700 transition-all active:scale-95 border-2 border-purple-600">
+        <span class="material-icons text-2xl">menu</span>
+    </button>
+
+    <!-- Overlay para mobile quando menu está aberto -->
+    <div id="menuOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-[70] hidden lg:hidden"></div>
+
+    <!-- Sidebar/Menu Lateral -->
+    <nav id="sidebar" class="w-64 h-screen bg-purple-800 text-white flex flex-col shadow-lg fixed top-0 left-0 z-[80] transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+        <div class="flex items-center gap-2 justify-between px-4 py-6 border-b border-purple-700">
+            <div class="flex items-center gap-2">
+                <span class="material-icons text-3xl">admin_panel_settings</span>
+                <span class="text-xl lg:text-2xl font-bold">RePensei Admin</span>
+            </div>
+            <!-- Botão fechar (apenas mobile) -->
+            <button id="closeSidebarBtn" class="lg:hidden text-white hover:text-purple-200 transition">
+                <span class="material-icons text-2xl">close</span>
+            </button>
         </div>
+        
         <ul class="flex flex-col gap-2 p-4">
             <li>
                 <a href="#dashboard" class="admin-menu-link flex items-center gap-3 px-4 py-3 rounded-lg font-semibold bg-purple-900 transition">
@@ -30,10 +46,11 @@
                 </a>
             </li>
         </ul>
+        
         <div class="mt-auto p-4 border-t border-purple-700">
             <div class="mb-2">
                 <span class="text-sm">Logado como:</span>
-                <span id="adminName" class="font-bold">Carregando...</span>
+                <p id="adminName" class="font-bold text-sm truncate">Carregando...</p>
             </div>
             <button id="adminLogoutBtn" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition shadow">
                 <span class="material-icons">logout</span>
@@ -42,98 +59,114 @@
         </div>
     </nav>
 
-    <main class="flex-1 h-screen overflow-y-auto p-8 ml-64">
+    <!-- Conteúdo Principal -->
+    <main id="mainContent" class="flex-1 min-h-screen overflow-y-auto p-4 md:p-6 lg:p-8 lg:ml-64 transition-all duration-300">
         
-        <section id="tela-dashboard" class="admin-tela">
-            <h1 class="text-4xl font-bold text-purple-800 mb-8">Dashboard</h1>
+        <!-- Dashboard -->
+        <section id="tela-dashboard" class="admin-tela pt-16 lg:pt-0">
+            <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-purple-800 mb-6 md:mb-8">Dashboard</h1>
             
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-xl shadow-lg flex items-center gap-4">
-                    <div class="p-3 rounded-full bg-purple-100 text-purple-600"><span class="material-icons text-3xl">group</span></div>
+            <!-- Cards de Estatísticas -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 mb-6 md:mb-8">
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-lg flex items-center gap-3 md:gap-4">
+                    <div class="p-2 md:p-3 rounded-full bg-purple-100 text-purple-600">
+                        <span class="material-icons text-2xl md:text-3xl">group</span>
+                    </div>
                     <div>
-                        <h3 class="text-gray-500 text-sm font-semibold">Total de Alunos</h3>
-                        <p id="statTotalAlunos" class="text-3xl font-bold text-gray-800">0</p>
+                        <h3 class="text-gray-500 text-xs md:text-sm font-semibold">Total de Alunos</h3>
+                        <p id="statTotalAlunos" class="text-2xl md:text-3xl font-bold text-gray-800">0</p>
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-lg flex items-center gap-4">
-                    <div class="p-3 rounded-full bg-green-100 text-green-600"><span class="material-icons text-3xl">task_alt</span></div>
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-lg flex items-center gap-3 md:gap-4">
+                    <div class="p-2 md:p-3 rounded-full bg-green-100 text-green-600">
+                        <span class="material-icons text-2xl md:text-3xl">task_alt</span>
+                    </div>
                     <div>
-                        <h3 class="text-gray-500 text-sm font-semibold">Média Geral</h3>
-                        <p id="statMediaGeral" class="text-3xl font-bold text-gray-800">0%</p>
+                        <h3 class="text-gray-500 text-xs md:text-sm font-semibold">Média Geral</h3>
+                        <p id="statMediaGeral" class="text-2xl md:text-3xl font-bold text-gray-800">0%</p>
                     </div>
                 </div>
                 
-                <div class="bg-white p-6 rounded-xl shadow-lg flex items-center gap-4">
-                    <div class="p-3 rounded-full bg-blue-100 text-blue-600"><span class="material-icons text-3xl">menu_book</span></div>
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-lg flex items-center gap-3 md:gap-4">
+                    <div class="p-2 md:p-3 rounded-full bg-blue-100 text-blue-600">
+                        <span class="material-icons text-2xl md:text-3xl">menu_book</span>
+                    </div>
                     <div>
-                        <h3 class="text-gray-500 text-sm font-semibold">Média Filosofia</h3>
-                        <p id="statMediaFilosofia" class="text-3xl font-bold text-gray-800">0%</p>
+                        <h3 class="text-gray-500 text-xs md:text-sm font-semibold">Média Filosofia</h3>
+                        <p id="statMediaFilosofia" class="text-2xl md:text-3xl font-bold text-gray-800">0%</p>
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-lg flex items-center gap-4">
-                    <div class="p-3 rounded-full bg-pink-100 text-pink-600"><span class="material-icons text-3xl">groups</span></div>
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-lg flex items-center gap-3 md:gap-4">
+                    <div class="p-2 md:p-3 rounded-full bg-pink-100 text-pink-600">
+                        <span class="material-icons text-2xl md:text-3xl">groups</span>
+                    </div>
                     <div>
-                        <h3 class="text-gray-500 text-sm font-semibold">Média Sociologia</h3>
-                        <p id="statMediaSociologia" class="text-3xl font-bold text-gray-800">0%</p>
+                        <h3 class="text-gray-500 text-xs md:text-sm font-semibold">Média Sociologia</h3>
+                        <p id="statMediaSociologia" class="text-2xl md:text-3xl font-bold text-gray-800">0%</p>
                     </div>
                 </div>
-
-                <div class="bg-transparent p-6 rounded-xl"></div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Alunos por Plano</h3>
+            <!-- Gráficos -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-lg">
+                    <h3 class="text-lg md:text-xl font-semibold text-gray-700 mb-4">Alunos por Plano</h3>
                     <div class="w-full max-w-sm mx-auto">
                         <canvas id="chartAlunosPlano"></canvas>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Quizzes por Tema e Plano (Últimos 7 dias)</h3>
-                    <canvas id="chartQuizzesGrouped"></canvas> </div>
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-lg">
+                    <h3 class="text-lg md:text-xl font-semibold text-gray-700 mb-4">Quizzes por Tema e Plano (Últimos 7 dias)</h3>
+                    <canvas id="chartQuizzesGrouped"></canvas>
+                </div>
             </div>
         </section>
 
-        <section id="tela-alunos" class="admin-tela hidden">
-            <h1 class="text-4xl font-bold text-purple-800 mb-8">Gerenciar Alunos</h1>
+        <!-- Gerenciar Alunos -->
+        <section id="tela-alunos" class="admin-tela hidden pt-16 lg:pt-0">
+            <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-purple-800 mb-6 md:mb-8">Gerenciar Alunos</h1>
             
-            <div class="flex flex-col md:flex-row gap-4 mb-6">
+            <!-- Filtros e Busca -->
+            <div class="flex flex-col md:flex-row gap-3 md:gap-4 mb-4 md:mb-6">
                 <div class="flex-1">
                     <label for="searchInput" class="sr-only">Buscar aluno</label>
-                    <input type="text" id="searchInput" placeholder="Buscar por nome ou email..." class="w-full px-4 py-3 rounded-lg input-custom text-lg">
+                    <input type="text" id="searchInput" placeholder="Buscar por nome ou email..." class="w-full px-3 md:px-4 py-2 md:py-3 rounded-lg input-custom text-base md:text-lg">
                 </div>
                 <div class="w-full md:w-auto">
                     <label for="filterPlano" class="sr-only">Filtrar por plano</label>
-                    <select id="filterPlano" class="w-full h-full px-4 py-3 rounded-lg input-custom text-lg bg-white">
+                    <select id="filterPlano" class="w-full h-full px-3 md:px-4 py-2 md:py-3 rounded-lg input-custom text-base md:text-lg bg-white">
                         <option value="">Todos os Planos</option>
                         <option value="freemium">Freemium</option>
                         <option value="premium">Premium</option>
                     </select>
                 </div>
-                <button id="btnNovoAluno" class="btn-primary">
-                    <span class="material-icons align-middle text-lg">add</span> Novo Aluno
+                <button id="btnNovoAluno" class="btn-primary whitespace-nowrap">
+                    <span class="material-icons align-middle text-base md:text-lg">add</span> 
+                    <span class="hidden sm:inline">Novo Aluno</span>
+                    <span class="sm:hidden">Novo</span>
                 </button>
             </div>
 
+            <!-- Tabela de Alunos -->
             <div class="bg-white rounded-xl shadow-lg overflow-x-auto">
                 <table class="w-full min-w-max">
                     <thead class="bg-gray-100">
                         <tr>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-600">Nome</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-600">Email</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-600">Plano</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-600">Quizzes Feitos</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-600">Média Filo.</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-600">Média Socio.</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-600">Média Geral</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-600">Ações</th>
+                            <th class="p-2 md:p-4 text-left text-xs md:text-sm font-semibold text-gray-600">Nome</th>
+                            <th class="p-2 md:p-4 text-left text-xs md:text-sm font-semibold text-gray-600 hidden sm:table-cell">Email</th>
+                            <th class="p-2 md:p-4 text-left text-xs md:text-sm font-semibold text-gray-600">Plano</th>
+                            <th class="p-2 md:p-4 text-left text-xs md:text-sm font-semibold text-gray-600 hidden md:table-cell">Quizzes</th>
+                            <th class="p-2 md:p-4 text-left text-xs md:text-sm font-semibold text-gray-600 hidden lg:table-cell">Filo.</th>
+                            <th class="p-2 md:p-4 text-left text-xs md:text-sm font-semibold text-gray-600 hidden lg:table-cell">Socio.</th>
+                            <th class="p-2 md:p-4 text-left text-xs md:text-sm font-semibold text-gray-600 hidden md:table-cell">Média</th>
+                            <th class="p-2 md:p-4 text-left text-xs md:text-sm font-semibold text-gray-600">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tabelaAlunosBody">
                         <tr>
-                            <td colspan="8" class="p-8 text-center text-gray-500">
+                            <td colspan="8" class="p-6 md:p-8 text-center text-gray-500 text-sm md:text-base">
                                 Carregando alunos...
                             </td>
                         </tr>
@@ -144,45 +177,47 @@
 
     </main>
 
-    <div id="modalAluno" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-        <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl modal-anim relative">
+    <!-- Modal Aluno -->
+    <div id="modalAluno" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl modal-anim relative max-h-[90vh] overflow-y-auto">
             <button id="fecharModalAluno" class="absolute top-4 right-4 text-purple-400 hover:text-pink-400 text-2xl z-10">
                 <span class="material-icons">close</span>
             </button>
-            <h2 id="modalAlunoTitulo" class="text-3xl font-extrabold text-purple-800 mb-6 tracking-wide">Novo Aluno</h2>
+            <h2 id="modalAlunoTitulo" class="text-2xl md:text-3xl font-extrabold text-purple-800 mb-6 tracking-wide">Novo Aluno</h2>
             
             <input type="hidden" id="alunoId" value="">
             
-            <label for="alunoNome" class="w-full text-left text-gray-700 font-medium mb-1">Nome:</label>
-            <input type="text" id="alunoNome" placeholder="Nome completo" class="w-full mb-4 px-4 py-3 rounded-lg input-custom text-lg" />
+            <label for="alunoNome" class="w-full text-left text-gray-700 font-medium mb-1 text-sm md:text-base">Nome:</label>
+            <input type="text" id="alunoNome" placeholder="Nome completo" class="w-full mb-4 px-3 md:px-4 py-2 md:py-3 rounded-lg input-custom text-base md:text-lg" />
             
-            <label for="alunoEmail" class="w-full text-left text-gray-700 font-medium mb-1">E-mail:</label>
-            <input type="email" id="alunoEmail" placeholder="E-mail" class="w-full mb-4 px-4 py-3 rounded-lg input-custom text-lg" />
+            <label for="alunoEmail" class="w-full text-left text-gray-700 font-medium mb-1 text-sm md:text-base">E-mail:</label>
+            <input type="email" id="alunoEmail" placeholder="E-mail" class="w-full mb-4 px-3 md:px-4 py-2 md:py-3 rounded-lg input-custom text-base md:text-lg" />
             
-            <label for="alunoPlano" class="w-full text-left text-gray-700 font-medium mb-1">Plano:</label>
-            <select id="alunoPlano" class="w-full mb-4 px-4 py-3 rounded-lg input-custom text-lg bg-white">
+            <label for="alunoPlano" class="w-full text-left text-gray-700 font-medium mb-1 text-sm md:text-base">Plano:</label>
+            <select id="alunoPlano" class="w-full mb-4 px-3 md:px-4 py-2 md:py-3 rounded-lg input-custom text-base md:text-lg bg-white">
                 <option value="freemium">Freemium</option>
                 <option value="premium">Premium</option>
             </select>
 
-            <label for="alunoSenha" class="w-full text-left text-gray-700 font-medium mb-1">Senha:</label>
-            <input type="password" id="alunoSenha" placeholder="Deixe em branco para não alterar" class="w-full mb-6 px-4 py-3 rounded-lg input-custom text-lg" />
+            <label for="alunoSenha" class="w-full text-left text-gray-700 font-medium mb-1 text-sm md:text-base">Senha:</label>
+            <input type="password" id="alunoSenha" placeholder="Deixe em branco para não alterar" class="w-full mb-6 px-3 md:px-4 py-2 md:py-3 rounded-lg input-custom text-base md:text-lg" />
             
-            <button id="salvarAlunoBtn" class="w-full btn-primary text-lg">
+            <button id="salvarAlunoBtn" class="w-full btn-primary text-base md:text-lg">
                 Salvar
             </button>
         </div>
     </div>
     
-    <div id="modalResultados" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-        <div class="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl modal-anim relative">
+    <!-- Modal Resultados -->
+    <div id="modalResultados" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl modal-anim relative max-h-[90vh] overflow-hidden flex flex-col">
             <button id="fecharModalResultados" class="absolute top-4 right-4 text-purple-400 hover:text-pink-400 text-2xl z-10">
                 <span class="material-icons">close</span>
             </button>
-            <h2 id="modalResultadosTitulo" class="text-3xl font-extrabold text-purple-800 mb-6 tracking-wide">Resultados</h2>
+            <h2 id="modalResultadosTitulo" class="text-2xl md:text-3xl font-extrabold text-purple-800 mb-6 tracking-wide pr-8">Resultados</h2>
             
-            <div id="listaResultadosContainer" class="max-h-96 overflow-y-auto pr-2">
-                <p class="text-gray-500 text-center">Carregando resultados...</p>
+            <div id="listaResultadosContainer" class="overflow-y-auto pr-2 flex-1">
+                <p class="text-gray-500 text-center text-sm md:text-base">Carregando resultados...</p>
             </div>
         </div>
     </div>

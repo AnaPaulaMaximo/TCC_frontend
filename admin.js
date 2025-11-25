@@ -21,46 +21,39 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===== NOVA FUNCIONALIDADE: MENU LATERAL RESPONSIVO =====
+
+// admin.js - Atualize esta função
 function setupMobileSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('menuOverlay');
     const openBtn = document.getElementById('openSidebarBtn');
-    const closeBtn = document.getElementById('closeSidebarBtn');
+    const closeBtn = document.getElementById('closeSidebarBtn'); // Se houver botão X no menu
     
-    // Abrir menu
-    openBtn.addEventListener('click', () => {
+    if (!sidebar || !openBtn) return;
+
+    // ABRIR
+    openBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Impede fechamento imediato
+        
+        // Remove classe que esconde (Tailwind)
         sidebar.classList.remove('-translate-x-full');
-        overlay.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // Previne scroll do body
+        // Adiciona classe que mostra (Style.css)
+        sidebar.classList.add('sidebar-visible');
+        
+        if (overlay) overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Trava scroll da página
     });
     
-    // Fechar menu
+    // FECHAR
     const closeSidebar = () => {
         sidebar.classList.add('-translate-x-full');
-        overlay.classList.add('hidden');
-        document.body.style.overflow = ''; // Restaura scroll
+        sidebar.classList.remove('sidebar-visible');
+        if (overlay) overlay.classList.add('hidden');
+        document.body.style.overflow = '';
     };
     
-    closeBtn.addEventListener('click', closeSidebar);
-    overlay.addEventListener('click', closeSidebar);
-    
-    // Fechar menu ao clicar em um link (mobile)
-    document.querySelectorAll('.admin-menu-link').forEach(link => {
-        link.addEventListener('click', () => {
-            if (window.innerWidth < 1024) { // lg breakpoint
-                closeSidebar();
-            }
-        });
-    });
-    
-    // Fechar menu ao redimensionar para desktop
-    window.addEventListener('resize', () => {
-        if (window.innerWidth >= 1024) {
-            sidebar.classList.remove('-translate-x-full');
-            overlay.classList.add('hidden');
-            document.body.style.overflow = '';
-        }
-    });
+    if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+    if (overlay) overlay.addEventListener('click', closeSidebar);
 }
 
 async function checkAdminSession() {
@@ -102,25 +95,38 @@ async function handleLogout() {
     }
 }
 
-// Navegação das Telas
+// Navegação do Menu
 function setupMenuLinks() {
     document.querySelectorAll('.admin-menu-link').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
+
+            // 1. NAVEGAÇÃO (Troca a tela)
             const targetId = link.getAttribute('href').substring(1); 
             
             document.querySelectorAll('.admin-tela').forEach(tela => {
                 tela.classList.toggle('hidden', tela.id !== `tela-${targetId}`);
             });
 
+            // Atualiza destaque do link
             document.querySelectorAll('.admin-menu-link').forEach(l => l.classList.remove('bg-purple-900'));
             link.classList.add('bg-purple-900');
             
-            // Recarrega dados ao trocar de tela
-            if (targetId === 'dashboard') {
-                loadDashboardData();
-            } else if (targetId === 'alunos') {
-                loadAlunosTable();
+            // Carrega dados se necessário
+            if (targetId === 'dashboard') loadDashboardData();
+            if (targetId === 'alunos') loadAlunosTable();
+
+            // 2. FECHAR MENU (Apenas se estiver no mobile)
+            if (window.innerWidth < 1024) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('menuOverlay');
+                
+                if (sidebar) {
+                    sidebar.classList.add('-translate-x-full'); // Tailwind hide
+                    sidebar.classList.remove('sidebar-visible'); // CSS hide
+                }
+                if (overlay) overlay.classList.add('hidden');
+                document.body.style.overflow = '';
             }
         });
     });

@@ -8,13 +8,31 @@
     <link rel="stylesheet" href="static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        /* 1. Força o botão a aparecer no mobile (vence o style.css global) */
+        @media (max-width: 768px) {
+            #openSidebarBtn {
+                display: block !important;
+            }
+        }
+
+        /* 2. CORREÇÃO CRÍTICA DO CLIQUE:
+           O style.css força o menu a ser z-index 60, mas seu overlay é 70.
+           Isso coloca o menu ATRÁS do overlay transparente.
+           Aqui forçamos o menu a ficar na frente de tudo (z-index 100). */
+        #sidebar.sidebar-visible {
+            z-index: 100 !important;
+        }
+    </style>
 </head>
 <body class="bg-purple-50">
 
     <!-- Botão hamburguer SEMPRE VISÍVEL no topo -->
-    <button id="openSidebarBtn" class="lg:hidden fixed top-4 left-4 z-[100] bg-purple-800 text-white p-3 rounded-lg shadow-2xl hover:bg-purple-700 transition-all active:scale-95 border-2 border-purple-600">
-        <span class="material-icons text-2xl">menu</span>
-    </button>
+   <button id="openSidebarBtn" 
+    class="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-purple-800 text-white shadow-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-300">
+    <span class="material-icons text-3xl">menu</span>
+</button>
 
     <!-- Overlay para mobile quando menu está aberto -->
     <div id="menuOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-[70] hidden lg:hidden"></div>

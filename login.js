@@ -27,42 +27,34 @@ const senhasComuns = [
 function validarSenha(senha) {
     const erros = [];
     
-    // Comprimento mínimo
     if (senha.length < 8) {
         erros.push('A senha deve ter no mínimo 8 caracteres');
     }
     
-    // Comprimento máximo (segurança contra ataques de buffer)
     if (senha.length > 128) {
         erros.push('A senha deve ter no máximo 128 caracteres');
     }
     
-    // Letra maiúscula
     if (!/[A-Z]/.test(senha)) {
         erros.push('Deve conter pelo menos uma letra maiúscula');
     }
     
-    // Letra minúscula
     if (!/[a-z]/.test(senha)) {
         erros.push('Deve conter pelo menos uma letra minúscula');
     }
     
-    // Número
     if (!/[0-9]/.test(senha)) {
         erros.push('Deve conter pelo menos um número');
     }
     
-    // Caractere especial
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(senha)) {
         erros.push('Deve conter pelo menos um caractere especial (!@#$%&*)');
     }
     
-    // Verificar se é uma senha comum
     if (senhasComuns.includes(senha.toLowerCase())) {
         erros.push('Esta senha é muito comum. Escolha uma senha mais segura');
     }
     
-    // Verificar sequências simples
     if (/(.)\1{2,}/.test(senha)) {
         erros.push('Evite repetir o mesmo caractere mais de 2 vezes seguidas');
     }
@@ -86,21 +78,16 @@ function validarConfirmacaoSenha(senha, confirmacao) {
 function validarNome(nome) {
     const erros = [];
     
-    // Remove espaços extras
     nome = nome.trim();
     
-    // Comprimento mínimo
     if (nome.length < 3) {
         erros.push('O nome deve ter no mínimo 3 caracteres');
     }
     
-    // Comprimento máximo
     if (nome.length > 30) {
         erros.push('O nome deve ter no máximo 30 caracteres');
     }
-       
     
-    // Verificar se contém apenas letras e espaços
     if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(nome)) {
         erros.push('O nome deve conter apenas letras');
     }
@@ -126,7 +113,6 @@ function atualizarForcaSenha(senha) {
     let corClass = '';
     let mensagem = '';
     
-    // Calcular força
     if (senha.length >= 8) forca++;
     if (senha.length >= 12) forca++;
     if (/[a-z]/.test(senha) && /[A-Z]/.test(senha)) forca++;
@@ -134,7 +120,6 @@ function atualizarForcaSenha(senha) {
     if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(senha)) forca++;
     if (senha.length >= 16) forca++;
     
-    // Determinar classificação
     if (forca <= 2) {
         corClass = 'bg-red-500';
         mensagem = 'Fraca';
@@ -146,7 +131,6 @@ function atualizarForcaSenha(senha) {
         mensagem = 'Forte';
     }
     
-    // Atualizar UI
     const largura = (forca / 6) * 100;
     barra.className = `h-full rounded transition-all duration-300 ${corClass}`;
     barra.style.width = `${largura}%`;
@@ -155,14 +139,20 @@ function atualizarForcaSenha(senha) {
 }
 
 /**
- * Mostra erros de validação na tela
+ * Mostra erros de validação na tela - VERSÃO CORRIGIDA
  */
 function mostrarErrosValidacao(campo, erros) {
     const input = document.getElementById(campo);
     if (!input) return;
     
-    // Remove erros anteriores
-    const erroAnterior = input.parentElement.querySelector('.erro-validacao');
+    // Encontra o container pai (div com class w-full mb-X)
+    let container = input.closest('.w-full');
+    if (!container) {
+        container = input.parentElement;
+    }
+    
+    // Remove erros anteriores deste campo
+    const erroAnterior = container.querySelector('.erro-validacao');
     if (erroAnterior) {
         erroAnterior.remove();
     }
@@ -173,28 +163,41 @@ function mostrarErrosValidacao(campo, erros) {
         
         // Cria elemento de erro
         const divErro = document.createElement('div');
-        divErro.className = 'erro-validacao text-red-600 text-sm mt-1';
+        divErro.className = 'erro-validacao text-red-600 text-xs mt-2 px-1';
         divErro.innerHTML = erros.map(e => `• ${e}`).join('<br>');
         
-        input.parentElement.appendChild(divErro);
+        // Adiciona o erro dentro do container, logo após o input ou seu wrapper
+        const inputWrapper = input.parentElement;
+        if (inputWrapper.classList.contains('relative')) {
+            // Se o input está dentro de um div relative (caso da senha), adiciona após o div
+            inputWrapper.parentElement.insertBefore(divErro, inputWrapper.nextSibling);
+        } else {
+            // Caso contrário, adiciona após o input
+            input.parentElement.insertBefore(divErro, input.nextSibling);
+        }
     } else {
-        // Remove borda vermelha
         input.classList.remove('border-red-500', 'border-2');
     }
 }
 
 /**
- * Limpa erros de validação
+ * Limpa erros de validação - VERSÃO CORRIGIDA
  */
 function limparErrosValidacao(campo) {
     const input = document.getElementById(campo);
     if (!input) return;
     
     input.classList.remove('border-red-500', 'border-2');
-    const erroAnterior = input.parentElement.querySelector('.erro-validacao');
-    if (erroAnterior) {
-        erroAnterior.remove();
+    
+    // Encontra o container pai
+    let container = input.closest('.w-full');
+    if (!container) {
+        container = input.parentElement;
     }
+    
+    // Remove todos os erros deste container
+    const erros = container.querySelectorAll('.erro-validacao');
+    erros.forEach(erro => erro.remove());
 }
 
 // ===================================================================
@@ -209,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Adicionar indicador de força da senha ao HTML
     if (cadastroSenha && !document.getElementById('forcaSenhaContainer')) {
+        const senhaContainer = cadastroSenha.closest('.w-full');
         const indicador = document.createElement('div');
         indicador.id = 'forcaSenhaContainer';
         indicador.className = 'mt-2';
@@ -221,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div id="barraSenha" class="h-full rounded transition-all duration-300" style="width: 0%"></div>
             </div>
         `;
-        cadastroSenha.parentElement.appendChild(indicador);
+        senhaContainer.appendChild(indicador);
     }
     
     // Validação em tempo real do nome
@@ -265,7 +269,6 @@ document.addEventListener('DOMContentLoaded', () => {
             atualizarForcaSenha(senha);
             limparErrosValidacao('cadastroSenha');
             
-            // Se já digitou confirmação, revalidar
             if (cadastroConfirmarSenha.value) {
                 limparErrosValidacao('cadastroConfirmarSenha');
             }
@@ -292,58 +295,52 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-// Lógica do Botão de Criar Conta (Não muda, pois só cria Alunos)
+
+    // Botão de Criar Conta
     document.getElementById('criarContaBtn').addEventListener('click', async () => {
         const nome = document.getElementById('cadastroNome').value.trim();
         const email = document.getElementById('cadastroEmail').value.trim().toLowerCase();
         const senha = document.getElementById('cadastroSenha').value;
         const confirmarSenha = document.getElementById('cadastroConfirmarSenha').value;
 
-        // ===== VALIDAÇÕES FRONTEND =====
         let temErro = false;
         
-        // 1. Validar nome
-        const resultadoNome = window.validacoesCadastro.validarNome(nome);
+        const resultadoNome = validarNome(nome);
         if (!resultadoNome.valida) {
-            window.validacoesCadastro.mostrarErrosValidacao('cadastroNome', resultadoNome.erros);
+            mostrarErrosValidacao('cadastroNome', resultadoNome.erros);
             temErro = true;
         } else {
-            window.validacoesCadastro.limparErrosValidacao('cadastroNome');
+            limparErrosValidacao('cadastroNome');
         }
         
-        // 2. Validar e-mail
-        if (!window.validacoesCadastro.validarEmail(email)) {
-            window.validacoesCadastro.mostrarErrosValidacao('cadastroEmail', ['Formato de e-mail inválido']);
+        if (!validarEmail(email)) {
+            mostrarErrosValidacao('cadastroEmail', ['Formato de e-mail inválido']);
             temErro = true;
         } else {
-            window.validacoesCadastro.limparErrosValidacao('cadastroEmail');
+            limparErrosValidacao('cadastroEmail');
         }
         
-        // 3. Validar senha
-        const resultadoSenha = window.validacoesCadastro.validarSenha(senha);
+        const resultadoSenha = validarSenha(senha);
         if (!resultadoSenha.valida) {
-            window.validacoesCadastro.mostrarErrosValidacao('cadastroSenha', resultadoSenha.erros);
+            mostrarErrosValidacao('cadastroSenha', resultadoSenha.erros);
             temErro = true;
         } else {
-            window.validacoesCadastro.limparErrosValidacao('cadastroSenha');
+            limparErrosValidacao('cadastroSenha');
         }
         
-        // 4. Validar confirmação de senha
-        if (!window.validacoesCadastro.validarConfirmacaoSenha(senha, confirmarSenha)) {
-            window.validacoesCadastro.mostrarErrosValidacao('cadastroConfirmarSenha', ['As senhas não coincidem']);
+        if (!validarConfirmacaoSenha(senha, confirmarSenha)) {
+            mostrarErrosValidacao('cadastroConfirmarSenha', ['As senhas não coincidem']);
             temErro = true;
         } else {
-            window.validacoesCadastro.limparErrosValidacao('cadastroConfirmarSenha');
+            limparErrosValidacao('cadastroConfirmarSenha');
         }
         
-        // Se houver erro, parar aqui
         if (temErro) {
             showNotification('Por favor, corrija os erros antes de continuar.', 'error');
             return;
         }
 
         try {
-            // Chama a rota /auth/cadastrar_usuario (continua a mesma)
             const response = await fetch(`${API_BASE_URL}/auth/cadastrar_usuario`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -357,9 +354,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     errorData = await response.json();
                 } catch (e) { /* Ignora */ }
                 
-                // Mostrar erros específicos do backend
                 if (errorData.detalhes) {
-                    window.validacoesCadastro.mostrarErrosValidacao('cadastroSenha', errorData.detalhes);
+                    mostrarErrosValidacao('cadastroSenha', errorData.detalhes);
                 }
                 
                 throw new Error(errorData.error || `Erro ${response.status}`);
@@ -370,19 +366,22 @@ document.addEventListener('DOMContentLoaded', () => {
             showNotification(data.message || 'Conta criada com sucesso!');
             fecharCriarConta();
             
-            // Limpar campos
             document.getElementById('cadastroNome').value = '';
             document.getElementById('cadastroEmail').value = '';
             document.getElementById('cadastroSenha').value = '';
             document.getElementById('cadastroConfirmarSenha').value = '';
             
-            // Resetar indicador de força
             const barra = document.getElementById('barraSenha');
             const texto = document.getElementById('textoSenha');
             if (barra) barra.style.width = '0%';
             if (texto) texto.textContent = '';
             
-            abrirLogin(); // Abre o modal de login para o usuário entrar
+            limparErrosValidacao('cadastroNome');
+            limparErrosValidacao('cadastroEmail');
+            limparErrosValidacao('cadastroSenha');
+            limparErrosValidacao('cadastroConfirmarSenha');
+            
+            abrirLogin();
 
         } catch (error) {
             console.error('Erro ao conectar com a API de cadastro:', error);

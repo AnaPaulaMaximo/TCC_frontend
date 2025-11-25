@@ -35,8 +35,7 @@
         </div>
     </div>
 
-    <!-- Modal de Login -->
-    <div id="modalLogin" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+    <div id="modalLogin" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden p-4">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl flex flex-col items-center modal-anim border-2 border-purple-200 relative">
             <button onclick="fecharLogin()" class="absolute top-4 right-4 text-purple-400 hover:text-pink-400 text-2xl z-10">
                 <span class="material-icons">close</span>
@@ -68,108 +67,116 @@
         </div>
     </div>
 
-    <!-- Modal de Criar Conta (ATUALIZADO COM VALIDAÇÕES) -->
-    <div id="modalCriarConta" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden overflow-y-auto">
-        <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl flex flex-col items-center modal-anim border-2 border-purple-200 relative my-8">
-            <button onclick="fecharCriarConta()" class="absolute top-4 right-4 text-purple-400 hover:text-pink-400 text-2xl z-10">
+    <div id="modalCriarConta" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl flex flex-col modal-anim border-2 border-purple-200 relative max-h-[90vh]">
+            
+            <button onclick="fecharCriarConta()" class="absolute top-4 right-4 text-purple-400 hover:text-pink-400 text-2xl z-20">
                 <span class="material-icons">close</span>
             </button>
-            
-            <h2 class="text-3xl font-extrabold text-purple-800 mb-2 tracking-wide">Criar Conta</h2>
-            <p class="text-gray-600 text-sm mb-6 text-center">Preencha os dados abaixo para começar</p>
-            
-            <!-- Campo Nome -->
-            <div class="w-full mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Nome o *</label>
-                <input 
-                    type="text" 
-                    id="cadastroNome" 
-                    placeholder="Digite seu nome" 
-                    class="w-full px-4 py-3 rounded-lg input-custom text-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
-                />
-            </div>
-            
-            <!-- Campo E-mail -->
-            <div class="w-full mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">E-mail *</label>
-                <input 
-                    type="email" 
-                    id="cadastroEmail" 
-                    placeholder="seu@email.com" 
-                    class="w-full px-4 py-3 rounded-lg input-custom text-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
-                    autocomplete="email"
-                />
-            </div>
-            
-            <!-- Campo Senha -->
-            <div class="w-full mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Senha *</label>
-                <div class="relative">
+
+            <div class="overflow-y-auto p-6 md:p-8 w-full flex flex-col items-center pb-12">
+                
+                <h2 class="text-3xl font-extrabold text-purple-800 mb-2 tracking-wide mt-2">Criar Conta</h2>
+                <p class="text-gray-600 text-sm mb-6 text-center">Preencha os dados abaixo para começar</p>
+                
+                <div class="w-full mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nome Completo *</label>
                     <input 
-                        type="password" 
-                        id="cadastroSenha" 
-                        placeholder="Crie uma senha forte" 
-                        class="w-full px-4 py-3 pr-12 rounded-lg input-custom text-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
-                        autocomplete="new-password"
+                        type="text" 
+                        id="cadastroNome" 
+                        placeholder="Digite seu nome" 
+                        class="w-full px-4 py-3 rounded-lg input-custom text-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
                     />
-                    <button 
-                        type="button"
-                        id="toggleCadastroSenha"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-600 transition focus:outline-none"
-                        aria-label="Mostrar/Ocultar senha"
-                    >
-                        <span class="material-icons" id="iconCadastroSenha">visibility_off</span>
-                    </button>
                 </div>
-                <!-- Indicador de força da senha será inserido aqui via JS -->
-            </div>
-            
-            <!-- Campo Confirmar Senha -->
-            <div class="w-full mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar Senha *</label>
-                <div class="relative">
+                
+                <div class="w-full mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">E-mail *</label>
                     <input 
-                        type="password" 
-                        id="cadastroConfirmarSenha" 
-                        placeholder="Digite a senha novamente" 
-                        class="w-full px-4 py-3 pr-12 rounded-lg input-custom text-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
-                        autocomplete="new-password"
+                        type="email" 
+                        id="cadastroEmail" 
+                        placeholder="seu@email.com" 
+                        class="w-full px-4 py-3 rounded-lg input-custom text-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
+                        autocomplete="email"
                     />
-                    <button 
-                        type="button"
-                        id="toggleCadastroConfirmar"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-600 transition focus:outline-none"
-                        aria-label="Mostrar/Ocultar senha"
-                    >
-                        <span class="material-icons" id="iconCadastroConfirmar">visibility_off</span>
-                    </button>
                 </div>
+                
+                <div class="w-full mb-4 relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Senha *</label>
+                    
+                    <div class="relative w-full">
+                        <input 
+                            type="password" 
+                            id="cadastroSenha" 
+                            placeholder="Crie uma senha forte" 
+                            class="w-full px-4 py-3 pr-12 rounded-lg input-custom text-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
+                            autocomplete="new-password"
+                        />
+                        <button 
+                            type="button"
+                            id="toggleCadastroSenha"
+                            class="absolute right-4 top-[13px] text-gray-500 hover:text-purple-600 transition focus:outline-none flex items-center justify-center z-10"
+                            aria-label="Mostrar/Ocultar senha"
+                        >
+                            <span class="material-icons" id="iconCadastroSenha">visibility_off</span>
+                        </button>
+                    </div>
+
+                    <div id="forcaSenhaContainer" class="mt-2">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs text-gray-600">Força da senha:</span>
+                            <span id="textoSenha" class="text-xs font-medium"></span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div id="barraSenha" class="h-full rounded transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="w-full mb-6 relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar Senha *</label>
+                    
+                    <div class="relative w-full">
+                        <input 
+                            type="password" 
+                            id="cadastroConfirmarSenha" 
+                            placeholder="Digite a senha novamente" 
+                            class="w-full px-4 py-3 pr-12 rounded-lg input-custom text-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
+                            autocomplete="new-password"
+                        />
+                        <button 
+                            type="button"
+                            id="toggleCadastroConfirmar"
+                            class="absolute right-4 top-[13px] text-gray-500 hover:text-purple-600 transition focus:outline-none flex items-center justify-center z-10"
+                            aria-label="Mostrar/Ocultar senha"
+                        >
+                            <span class="material-icons" id="iconCadastroConfirmar">visibility_off</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="w-full mb-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <p class="text-sm font-semibold text-purple-800 mb-2">📋 Requisitos da senha:</p>
+                    <ul class="text-xs text-gray-700 space-y-1">
+                        <li>✓ Mínimo de 8 caracteres</li>
+                        <li>✓ Pelo menos uma letra maiúscula (A-Z)</li>
+                        <li>✓ Pelo menos uma letra minúscula (a-z)</li>
+                        <li>✓ Pelo menos um número (0-9)</li>
+                        <li>✓ Pelo menos um caractere especial (!@#$%&*)</li>
+                    </ul>
+                </div>
+                
+                <button id="criarContaBtn" class="w-full btn-animado bg-gradient-to-r from-purple-400 to-pink-400 text-white font-bold py-3 rounded-lg shadow transition mb-3 text-lg hover:shadow-lg flex-shrink-0">
+                    Criar conta
+                </button>
+                <button onclick="fecharCriarConta()" class="text-purple-700 hover:underline mt-2 text-base flex-shrink-0">Cancelar</button>
             </div>
-            
-            <!-- Requisitos de Senha -->
-            <div class="w-full mb-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
-                <p class="text-sm font-semibold text-purple-800 mb-2">📋 Requisitos da senha:</p>
-                <ul class="text-xs text-gray-700 space-y-1">
-                    <li>✓ Mínimo de 8 caracteres</li>
-                    <li>✓ Pelo menos uma letra maiúscula (A-Z)</li>
-                    <li>✓ Pelo menos uma letra minúscula (a-z)</li>
-                    <li>✓ Pelo menos um número (0-9)</li>
-                    <li>✓ Pelo menos um caractere especial (!@#$%&*)</li>
-                </ul>
-            </div>
-            
-            <button id="criarContaBtn" class="w-full btn-animado bg-gradient-to-r from-purple-400 to-pink-400 text-white font-bold py-3 rounded-lg shadow transition mb-3 text-lg hover:shadow-lg">
-                Criar conta
-            </button>
-            <button onclick="fecharCriarConta()" class="text-purple-700 hover:underline mt-2 text-base">Cancelar</button>
         </div>
     </div>
 
-    <!-- Scripts -->
     <script>
         // Importar validações primeiro
         const script = document.createElement('script');
-        script.src = 'validacoes.js'; // Arquivo com as funções de validação
+        script.src = 'validacoes.js'; 
         document.head.appendChild(script);
     </script>
     <script src="login.js"></script>

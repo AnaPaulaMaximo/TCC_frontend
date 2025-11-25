@@ -16,53 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (!sidebar) return;
         
-        // ============================================
-        // NOVO: Adicionar botão de fechar na sidebar (mobile)
-        // ============================================
-        if (window.innerWidth <= 768) {
-            // Verifica se já não existe o botão
-            if (!sidebar.querySelector('.close-sidebar-mobile-btn')) {
-                const closeBtn = document.createElement('button');
-                closeBtn.className = 'close-sidebar-mobile-btn';
-                closeBtn.innerHTML = '<span class="material-icons">close</span>';
-                closeBtn.style.cssText = `
-                    position: absolute;
-                    top: 1rem;
-                    right: 1rem;
-                    background: rgba(255, 255, 255, 0.2);
-                    border: none;
-                    border-radius: 50%;
-                    width: 2.5rem;
-                    height: 2.5rem;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: white;
-                    font-size: 1.5rem;
-                    cursor: pointer;
-                    z-index: 100;
-                    transition: all 0.3s ease;
-                `;
-                
-                closeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    closeSidebar();
-                });
-                
-                // Adiciona hover effect
-                closeBtn.addEventListener('mouseenter', () => {
-                    closeBtn.style.background = 'rgba(239, 68, 68, 0.8)';
-                    closeBtn.style.transform = 'scale(1.1)';
-                });
-                
-                closeBtn.addEventListener('mouseleave', () => {
-                    closeBtn.style.background = 'rgba(255, 255, 255, 0.2)';
-                    closeBtn.style.transform = 'scale(1)';
-                });
-                
-                sidebar.insertBefore(closeBtn, sidebar.firstChild);
-            }
-        }
+        
         
         // Função para fechar sidebar
         function closeSidebar() {
@@ -96,23 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Fecha sidebar ao clicar em um link (mobile) - EXCETO botão de fechar sidebar
-        const sidebarLinks = sidebar.querySelectorAll('a, button');
-        sidebarLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                // Não fecha se for o botão de fechar ou de esconder sidebar
-                if (link.classList.contains('close-sidebar-mobile-btn') || 
-                    link.id === 'hideSidebarBtn') {
-                    return;
-                }
-                
-                if (window.innerWidth <= 768 && !link.id?.includes('Sidebar')) {
-                    setTimeout(() => {
-                        closeSidebar();
-                    }, 200);
-                }
-            });
-        });
+        
     }
     
     // ====================================

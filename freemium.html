@@ -16,9 +16,10 @@
     <nav id="topbar" class="w-full topbar-gradient shadow z-50 fixed top-0 left-0 topbar-transition topbar-visible" style="padding-left: 16rem;">
         <div class="flex flex-row items-center justify-between gap-8 py-4 px-8">
             <div class="flex items-center gap-2 absolute left-8 top-1/2 -translate-y-1/2">
-                <img id="topbarLogo" src="static/img/ft_perfil.png" alt="Logo" class="w-10 h-10 drop-shadow rounded-full border-2 border-white">
-                <span class="text-3xl font-extrabold text-white drop-shadow tracking-wide">RePensei</span>
-            </div>
+    <img id="topbarLogo" onclick="toggleSidebar()" src="static/img/ft_perfil.png" alt="Logo" class="w-10 h-10 drop-shadow rounded-full border-2 border-white cursor-pointer hover:opacity-80 transition">
+    
+    <span class="text-3xl font-extrabold text-white drop-shadow tracking-wide hidden md:block">RePensei</span>
+</div>
             <div class="flex flex-row items-center justify-center gap-8 mx-auto relative" id="menuBar">
                 <a href="#" class="menu-link font-semibold text-white hover:text-pink-300 transition" data-page="flashcards">
                     Flashcards
@@ -62,9 +63,11 @@
         </div>
     </nav>
     
+    <div class="hidden md:block">
     <button id="openSidebarBtn" onclick="toggleSidebar()" class="fixed bottom-8 left-8 z-50 bg-[#4c1d95] text-white p-3 rounded-full shadow-lg text-2xl focus:outline-none hidden transition-all duration-300">
         <span class="material-icons">menu</span>
     </button>
+    </div>
 
     <div id="mainContent" class="flex-1 ml-64 flex flex-col items-center justify-center w-full transition-all duration-400 mt-8 mb-8 px-4">
         

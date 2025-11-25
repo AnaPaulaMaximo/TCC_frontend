@@ -796,10 +796,7 @@ body {
         max-width: 280px;
     }
     
-    /* Botão de fechar sidebar (mobile) */
-    .close-sidebar-mobile-btn {
-        display: block !important;
-    }
+    
     
     /* Overlay escuro quando sidebar aberta */
     #sidebar.sidebar-visible::before {
@@ -951,5 +948,56 @@ body {
     .glass {
         background: white;
         border: 1px solid #ccc;
+    }
+}
+
+
+/* ========================================
+   CORREÇÕES PARA MOBILE - SIDEBAR E TOPBAR
+   ======================================== */
+
+/* Esconde o botão flutuante de abrir menu no mobile */
+@media (max-width: 768px) {
+    #openSidebarBtn {
+        display: none !important;
+    }
+    
+    /* Torna a foto de perfil clicável no mobile */
+    #topbarLogo {
+        cursor: pointer;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    
+    #topbarLogo:active {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+    
+    /* Esconde o nome "RePensei" no mobile */
+    .topbar-title-text {
+        display: none !important;
+    }
+    
+    /* Ajusta o espaçamento da topbar no mobile quando sidebar está escondida */
+    #topbar.mobile-sidebar-hidden {
+        padding-left: 0 !important;
+    }
+    
+    /* Ajusta o container da logo para centralizar melhor */
+    .topbar-logo-container {
+        position: relative !important;
+        left: 0 !important;
+        transform: none !important;
+    }
+}
+
+/* Para telas maiores, mantém o comportamento normal */
+@media (min-width: 769px) {
+    .topbar-title-text {
+        display: inline !important;
+    }
+    
+    #topbarLogo {
+        cursor: default;
     }
 }

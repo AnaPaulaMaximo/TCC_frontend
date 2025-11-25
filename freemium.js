@@ -593,3 +593,126 @@ document.addEventListener('DOMContentLoaded', () => {
          }
     });
 });
+
+
+/**
+ * Mobile Sidebar Handler
+ * Adiciona funcionalidade para abrir o sidebar clicando na foto de perfil no mobile
+ */
+
+(function() {
+    'use strict';
+    
+    // Função para verificar se está no mobile
+    function isMobile() {
+        return window.innerWidth <= 768;
+    }
+    
+    // Função para configurar o comportamento da foto de perfil
+    function setupProfilePhotoClick() {
+        const topbarLogo = document.getElementById('topbarLogo');
+        
+        if (!topbarLogo) {
+            console.warn('topbarLogo não encontrado');
+            return;
+        }
+        
+        // Remove listener anterior se existir
+        if (topbarLogo._sidebarClickHandler) {
+            topbarLogo.removeEventListener('click', topbarLogo._sidebarClickHandler);
+        }
+        
+        // Cria novo handler
+        const clickHandler = function(e) {
+            if (isMobile()) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleSidebar();
+            }
+        };
+        
+        // Armazena referência ao handler para poder remover depois
+        topbarLogo._sidebarClickHandler = clickHandler;
+        
+        // Adiciona o listener
+        topbarLogo.addEventListener('click', clickHandler);
+        
+        // Adiciona feedback visual no mobile
+        if (isMobile()) {
+            topbarLogo.style.cursor = 'pointer';
+        } else {
+            topbarLogo.style.cursor = 'default';
+        }
+    }
+    
+    // Função para ajustar classes da topbar baseado no estado do sidebar
+    function updateTopbarClasses() {
+        const topbar = document.getElementById('topbar');
+        const sidebar = document.getElementById('sidebar');
+        
+        if (!topbar || !sidebar) return;
+        
+        if (isMobile()) {
+            if (sidebar.classList.contains('sidebar-hidden')) {
+                topbar.classList.add('mobile-sidebar-hidden');
+            } else {
+                topbar.classList.remove('mobile-sidebar-hidden');
+            }
+        } else {
+            topbar.classList.remove('mobile-sidebar-hidden');
+        }
+    }
+    
+    // Adiciona classe ao span do nome para poder escondê-lo no mobile
+    function setupTopbarTitle() {
+        const topbar = document.getElementById('topbar');
+        if (!topbar) return;
+        
+        // Procura pelo span com o texto "RePensei"
+        const titleSpan = topbar.querySelector('.text-3xl.font-extrabold.text-white');
+        if (titleSpan && titleSpan.textContent.includes('RePensei')) {
+            titleSpan.classList.add('topbar-title-text');
+        }
+        
+        // Adiciona classe ao container da logo
+        const logoContainer = topbar.querySelector('.flex.items-center.gap-2.absolute');
+        if (logoContainer) {
+            logoContainer.classList.add('topbar-logo-container');
+        }
+    }
+    
+    // Override da função toggleSidebar original para incluir update das classes
+    const originalToggleSidebar = window.toggleSidebar;
+    window.toggleSidebar = function() {
+        if (originalToggleSidebar) {
+            originalToggleSidebar();
+        }
+        // Pequeno delay para garantir que as classes do sidebar foram atualizadas
+        setTimeout(updateTopbarClasses, 50);
+    };
+    
+    // Inicialização
+    function init() {
+        setupTopbarTitle();
+        setupProfilePhotoClick();
+        updateTopbarClasses();
+        
+        // Reajusta ao redimensionar a janela
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                setupProfilePhotoClick();
+                updateTopbarClasses();
+            }, 250);
+        });
+    }
+    
+    // Executa quando o DOM estiver pronto
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+    
+})();

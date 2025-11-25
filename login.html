@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="static/style.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
- 
 </head>
 <body class="bg-gradient-to-br from-purple-800 via-purple-500 to-purple-300 min-h-screen flex items-center justify-center p-4">
 
@@ -36,6 +35,7 @@
         </div>
     </div>
 
+    <!-- Modal de Login -->
     <div id="modalLogin" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl flex flex-col items-center modal-anim border-2 border-purple-200 relative">
             <button onclick="fecharLogin()" class="absolute top-4 right-4 text-purple-400 hover:text-pink-400 text-2xl z-10">
@@ -43,7 +43,24 @@
             </button>
             <h2 class="text-3xl font-extrabold text-purple-800 mb-6 tracking-wide">Entrar</h2>
             <input type="email" id="loginEmail" placeholder="E-mail" class="w-full mb-4 px-4 py-3 rounded-lg input-custom text-lg" />
-            <input type="password" id="loginSenha" placeholder="Senha" class="w-full mb-6 px-4 py-3 rounded-lg input-custom text-lg" />
+            
+            <div class="relative w-full mb-6">
+                <input 
+                    type="password" 
+                    id="loginSenha" 
+                    placeholder="Senha" 
+                    class="w-full px-4 py-3 pr-12 rounded-lg input-custom text-lg"
+                />
+                <button 
+                    type="button"
+                    id="toggleLoginSenha"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-600 transition focus:outline-none"
+                    aria-label="Mostrar/Ocultar senha"
+                >
+                    <span class="material-icons" id="iconLoginSenha">visibility_off</span>
+                </button>
+            </div>
+            
             <button id="entrarBtn" class="w-full btn-animado bg-gradient-to-r from-pink-400 to-purple-400 text-white font-bold py-3 rounded-lg shadow transition mb-3 text-lg">
                 Entrar
             </button>
@@ -51,23 +68,110 @@
         </div>
     </div>
 
-    <div id="modalCriarConta" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-        <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl flex flex-col items-center modal-anim border-2 border-purple-200 relative">
+    <!-- Modal de Criar Conta (ATUALIZADO COM VALIDAÇÕES) -->
+    <div id="modalCriarConta" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden overflow-y-auto">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl flex flex-col items-center modal-anim border-2 border-purple-200 relative my-8">
             <button onclick="fecharCriarConta()" class="absolute top-4 right-4 text-purple-400 hover:text-pink-400 text-2xl z-10">
                 <span class="material-icons">close</span>
             </button>
-            <h2 class="text-3xl font-extrabold text-purple-800 mb-6 tracking-wide">Criar Conta</h2>
-            <input type="text" id="cadastroNome" placeholder="Nome completo" class="w-full mb-4 px-4 py-3 rounded-lg input-custom text-lg" />
-            <input type="email" id="cadastroEmail" placeholder="E-mail" class="w-full mb-4 px-4 py-3 rounded-lg input-custom text-lg" />
-            <input type="password" id="cadastroSenha" placeholder="Senha" class="w-full mb-4 px-4 py-3 rounded-lg input-custom text-lg" />
-            <input type="password" id="cadastroConfirmarSenha" placeholder="Confirmar senha" class="w-full mb-6 px-4 py-3 rounded-lg input-custom text-lg" />
-            <button id="criarContaBtn" class="w-full btn-animado bg-gradient-to-r from-purple-400 to-pink-400 text-white font-bold py-3 rounded-lg shadow transition mb-3 text-lg">
+            
+            <h2 class="text-3xl font-extrabold text-purple-800 mb-2 tracking-wide">Criar Conta</h2>
+            <p class="text-gray-600 text-sm mb-6 text-center">Preencha os dados abaixo para começar</p>
+            
+            <!-- Campo Nome -->
+            <div class="w-full mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nome o *</label>
+                <input 
+                    type="text" 
+                    id="cadastroNome" 
+                    placeholder="Digite seu nome" 
+                    class="w-full px-4 py-3 rounded-lg input-custom text-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
+                />
+            </div>
+            
+            <!-- Campo E-mail -->
+            <div class="w-full mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">E-mail *</label>
+                <input 
+                    type="email" 
+                    id="cadastroEmail" 
+                    placeholder="seu@email.com" 
+                    class="w-full px-4 py-3 rounded-lg input-custom text-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
+                    autocomplete="email"
+                />
+            </div>
+            
+            <!-- Campo Senha -->
+            <div class="w-full mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Senha *</label>
+                <div class="relative">
+                    <input 
+                        type="password" 
+                        id="cadastroSenha" 
+                        placeholder="Crie uma senha forte" 
+                        class="w-full px-4 py-3 pr-12 rounded-lg input-custom text-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
+                        autocomplete="new-password"
+                    />
+                    <button 
+                        type="button"
+                        id="toggleCadastroSenha"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-600 transition focus:outline-none"
+                        aria-label="Mostrar/Ocultar senha"
+                    >
+                        <span class="material-icons" id="iconCadastroSenha">visibility_off</span>
+                    </button>
+                </div>
+                <!-- Indicador de força da senha será inserido aqui via JS -->
+            </div>
+            
+            <!-- Campo Confirmar Senha -->
+            <div class="w-full mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar Senha *</label>
+                <div class="relative">
+                    <input 
+                        type="password" 
+                        id="cadastroConfirmarSenha" 
+                        placeholder="Digite a senha novamente" 
+                        class="w-full px-4 py-3 pr-12 rounded-lg input-custom text-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
+                        autocomplete="new-password"
+                    />
+                    <button 
+                        type="button"
+                        id="toggleCadastroConfirmar"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-600 transition focus:outline-none"
+                        aria-label="Mostrar/Ocultar senha"
+                    >
+                        <span class="material-icons" id="iconCadastroConfirmar">visibility_off</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Requisitos de Senha -->
+            <div class="w-full mb-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <p class="text-sm font-semibold text-purple-800 mb-2">📋 Requisitos da senha:</p>
+                <ul class="text-xs text-gray-700 space-y-1">
+                    <li>✓ Mínimo de 8 caracteres</li>
+                    <li>✓ Pelo menos uma letra maiúscula (A-Z)</li>
+                    <li>✓ Pelo menos uma letra minúscula (a-z)</li>
+                    <li>✓ Pelo menos um número (0-9)</li>
+                    <li>✓ Pelo menos um caractere especial (!@#$%&*)</li>
+                </ul>
+            </div>
+            
+            <button id="criarContaBtn" class="w-full btn-animado bg-gradient-to-r from-purple-400 to-pink-400 text-white font-bold py-3 rounded-lg shadow transition mb-3 text-lg hover:shadow-lg">
                 Criar conta
             </button>
             <button onclick="fecharCriarConta()" class="text-purple-700 hover:underline mt-2 text-base">Cancelar</button>
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script>
+        // Importar validações primeiro
+        const script = document.createElement('script');
+        script.src = 'validacoes.js'; // Arquivo com as funções de validação
+        document.head.appendChild(script);
+    </script>
     <script src="login.js"></script>
 </body>
 </html>

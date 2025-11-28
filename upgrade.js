@@ -196,7 +196,7 @@ function showWelcomePremiumModal() {
  * Processa o upgrade do usuário
  */
 async function processarUpgrade() {
-    const API_BASE_URL = 'http://127.0.0.1:5000'; // URL do seu backend
+    const API_BASE_URL = 'https://tcc-backend-repensei.onrender.com'; // URL do seu backend
     
     // Mostra loading no botão
     const submitBtn = document.querySelector('#paymentForm button[type="submit"]');

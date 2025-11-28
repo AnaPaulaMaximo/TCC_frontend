@@ -354,7 +354,7 @@ function handleLogout() {
         socket.disconnect();
         socket = null; // Limpa a variável do socket
     }
-    window.location.href = 'login.html';
+    window.location.href = '/login';
 }
 
 function updateProfileDisplay() {

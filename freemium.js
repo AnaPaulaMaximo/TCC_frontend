@@ -200,7 +200,7 @@ function updateAuthButton() {
 
 function handleLogout() {
     sessionStorage.removeItem('currentUser');
-    window.location.href = 'login.html';
+    window.location.href = '/login';
 }
 
 function updateProfileDisplay() {

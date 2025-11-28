@@ -235,12 +235,29 @@ function updateAuthButton() {
 }
 
 // Função de Logout
-function handleLogout() {
+async function handleLogout() {
+    try {
+        // Chama o backend para destruir o cookie de sessão
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+            method: 'POST',
+            credentials: 'include' // Importante para enviar o cookie que será destruído
+        });
+    } catch (error) {
+        console.error("Erro ao notificar logout ao servidor:", error);
+    }
+
+    // Limpeza do Frontend (já existente no seu código)
     sessionStorage.removeItem('currentUser');
+    
+    // Se estiver usando socket, desconecta
+    if (typeof socket !== 'undefined' && socket) {
+        socket.disconnect();
+    }
+
     currentUser = { id: null, nome: 'Visitante', email: 'Faça login para continuar', plano: 'freemium', fotoUrl: 'static/img/ft_perfil.png' };
-    updateUIForPlan();
-    showTela('inicio');
-    showNotification('Você foi desconectado!'); // Sucesso (padrão)
+    
+    // Redireciona
+    window.location.href = 'login.html';
 }
 
 // Carrega usuário da sessão

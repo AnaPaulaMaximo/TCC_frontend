@@ -1,4 +1,13 @@
 // ===================================================================
+// CONFIGURAÇÃO DA API
+// ===================================================================
+
+const API_BASE_URL = 'https://tcc-backend-repensei.onrender.com';
+
+console.log('✅ validacoes.js carregado com sucesso!');
+console.log('🔗 API Base URL:', API_BASE_URL);
+
+// ===================================================================
 // NOTIFICAÇÃO
 // ===================================================================
 
@@ -58,33 +67,31 @@ function showNotification(message, type = 'success') {
 }
 
 // ===================================================================
-// CONFIGURAÇÃO DA API
-// ===================================================================
-
-const API_BASE_URL = 'https://tcc-backend-repensei.onrender.com';
-
-// ===================================================================
 // FUNÇÕES PARA ABRIR/FECHAR MODAIS
 // ===================================================================
 
 window.abrirLogin = function () {
+    console.log('📂 Abrindo modal de login');
     document.getElementById('modalLogin').classList.remove('hidden');
 }
 
 window.fecharLogin = function () {
+    console.log('📂 Fechando modal de login');
     document.getElementById('modalLogin').classList.add('hidden');
 }
 
 window.abrirCriarConta = function () {
+    console.log('📂 Abrindo modal de criar conta');
     document.getElementById('modalCriarConta').classList.remove('hidden');
 }
 
 window.fecharCriarConta = function () {
+    console.log('📂 Fechando modal de criar conta');
     document.getElementById('modalCriarConta').classList.add('hidden');
 }
 
 // ===================================================================
-// VALIDAÇÕES (mantidas como estavam)
+// VALIDAÇÕES
 // ===================================================================
 
 const validacoesCadastro = {
@@ -210,7 +217,12 @@ const validacoesCadastro = {
         const input = document.getElementById(campo);
         if (!input) return;
         
-        const erroAnterior = input.parentElement.querySelector('.erro-validacao');
+        let container = input.closest('.w-full');
+        if (!container) {
+            container = input.parentElement;
+        }
+        
+        const erroAnterior = container.querySelector('.erro-validacao');
         if (erroAnterior) {
             erroAnterior.remove();
         }
@@ -219,10 +231,15 @@ const validacoesCadastro = {
             input.classList.add('border-red-500', 'border-2');
             
             const divErro = document.createElement('div');
-            divErro.className = 'erro-validacao text-red-600 text-sm mt-1';
+            divErro.className = 'erro-validacao text-red-600 text-xs mt-2 px-1';
             divErro.innerHTML = erros.map(e => `• ${e}`).join('<br>');
             
-            input.parentElement.appendChild(divErro);
+            const inputWrapper = input.parentElement;
+            if (inputWrapper.classList.contains('relative')) {
+                inputWrapper.parentElement.insertBefore(divErro, inputWrapper.nextSibling);
+            } else {
+                input.parentElement.insertBefore(divErro, input.nextSibling);
+            }
         } else {
             input.classList.remove('border-red-500', 'border-2');
         }
@@ -233,10 +250,14 @@ const validacoesCadastro = {
         if (!input) return;
         
         input.classList.remove('border-red-500', 'border-2');
-        const erroAnterior = input.parentElement.querySelector('.erro-validacao');
-        if (erroAnterior) {
-            erroAnterior.remove();
+        
+        let container = input.closest('.w-full');
+        if (!container) {
+            container = input.parentElement;
         }
+        
+        const erros = container.querySelectorAll('.erro-validacao');
+        erros.forEach(erro => erro.remove());
     }
 };
 
@@ -247,21 +268,26 @@ window.validacoesCadastro = validacoesCadastro;
 // ===================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 DOM Carregado - Inicializando...');
 
-    // 🔥 CORREÇÃO 1: Verificar se já está logado ANTES de mostrar login
+    // 🔥 Verificar se já está logado ANTES de mostrar login
     const userSession = sessionStorage.getItem('currentUser');
     const adminSession = sessionStorage.getItem('currentAdmin');
     
     if (userSession) {
+        console.log('👤 Usuário já logado, redirecionando...');
         const user = JSON.parse(userSession);
         window.location.href = user.plano === 'premium' ? 'premium.html' : 'freemium.html';
-        return; // Para execução
+        return;
     }
     
     if (adminSession) {
+        console.log('👤 Admin já logado, redirecionando...');
         window.location.href = 'admin.html';
         return;
     }
+    
+    console.log('✅ Nenhuma sessão ativa, continuando na tela de login');
     
     // ===================================================================
     // CONFIGURAR TOGGLE DE SENHA
@@ -272,7 +298,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const button = document.getElementById(buttonId);
         const icon = document.getElementById(iconId);
         
-        if (!input || !button || !icon) return;
+        if (!input || !button || !icon) {
+            console.warn(`⚠️ Toggle de senha não encontrado: ${inputId}`);
+            return;
+        }
         
         button.addEventListener('click', () => {
             const isPassword = input.type === 'password';
@@ -287,33 +316,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setupPasswordToggle('cadastroConfirmarSenha', 'toggleCadastroConfirmar', 'iconCadastroConfirmar');
 
     // ===================================================================
-    // ADICIONAR INDICADOR DE FORÇA DA SENHA
-    // ===================================================================
-    
-    const cadastroSenha = document.getElementById('cadastroSenha');
-    
-    if (cadastroSenha && !document.getElementById('forcaSenhaContainer')) {
-        const indicador = document.createElement('div');
-        indicador.id = 'forcaSenhaContainer';
-        indicador.className = 'mt-2';
-        indicador.innerHTML = `
-            <div class="flex justify-between items-center mb-1">
-                <span class="text-xs text-gray-600">Força da senha:</span>
-                <span id="textoSenha" class="text-xs font-medium"></span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-                <div id="barraSenha" class="h-full rounded transition-all duration-300" style="width: 0%"></div>
-            </div>
-        `;
-        cadastroSenha.parentElement.appendChild(indicador);
-    }
-
-    // ===================================================================
     // VALIDAÇÕES EM TEMPO REAL
     // ===================================================================
     
     const cadastroNome = document.getElementById('cadastroNome');
     const cadastroEmail = document.getElementById('cadastroEmail');
+    const cadastroSenha = document.getElementById('cadastroSenha');
     const cadastroConfirmarSenha = document.getElementById('cadastroConfirmarSenha');
     
     if (cadastroNome) {
@@ -354,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
             validacoesCadastro.atualizarForcaSenha(senha);
             validacoesCadastro.limparErrosValidacao('cadastroSenha');
             
-            if (cadastroConfirmarSenha.value) {
+            if (cadastroConfirmarSenha && cadastroConfirmarSenha.value) {
                 validacoesCadastro.limparErrosValidacao('cadastroConfirmarSenha');
             }
         });
@@ -373,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         cadastroConfirmarSenha.addEventListener('blur', () => {
-            if (cadastroConfirmarSenha.value && 
+            if (cadastroConfirmarSenha.value && cadastroSenha &&
                 !validacoesCadastro.validarConfirmacaoSenha(cadastroSenha.value, cadastroConfirmarSenha.value)) {
                 validacoesCadastro.mostrarErrosValidacao('cadastroConfirmarSenha', ['As senhas não coincidem']);
             }
@@ -386,7 +394,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const btnLogin = document.getElementById('entrarBtn');
     if (btnLogin) {
+        console.log('✅ Botão de login encontrado');
         btnLogin.addEventListener('click', async () => {
+            console.log('🔑 Tentando fazer login...');
+            
             const email = document.getElementById('loginEmail').value.trim();
             const senha = document.getElementById('loginSenha').value;
 
@@ -395,20 +406,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // 🔥 Desabilita botão durante o request
             const originalText = btnLogin.textContent;
             btnLogin.disabled = true;
             btnLogin.textContent = 'Entrando...';
 
             try {
+                console.log('📡 Enviando request para:', `${API_BASE_URL}/auth/login`);
+                
                 const response = await fetch(`${API_BASE_URL}/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ email, senha }),
-                    credentials: 'include' 
+                    credentials: 'include'
                 });
+                
+                console.log('📡 Resposta HTTP:', response.status);
                 
                 if (!response.ok) {
                     let errorData = { error: `Erro HTTP: ${response.status}` };
@@ -421,7 +435,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 console.log('✅ Resposta do servidor:', data);
                 
-                // 🔥 ARMAZENAR NA SESSION STORAGE
                 if (data.role === 'admin') {
                     sessionStorage.setItem('currentAdmin', JSON.stringify(data.user));
                     showNotification('Login de admin realizado!');
@@ -433,7 +446,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     sessionStorage.setItem('currentUser', JSON.stringify(data.user));
                     showNotification('Login realizado com sucesso!');
                     
-                    // 🔥 Redirecionar após 500ms
                     setTimeout(() => {
                         if (data.user.plano === 'premium') {
                             window.location.href = 'premium.html';
@@ -449,11 +461,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('❌ Erro ao fazer login:', error);
                 showNotification(`Erro ao fazer login: ${error.message}`, 'error');
             } finally {
-                // 🔥 Reabilita botão
                 btnLogin.disabled = false;
                 btnLogin.textContent = originalText;
             }
         });
+    } else {
+        console.error('❌ Botão de login NÃO encontrado!');
     }
 
     // ===================================================================
@@ -462,7 +475,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const btnCriar = document.getElementById('criarContaBtn');
     if (btnCriar) {
+        console.log('✅ Botão de criar conta encontrado');
         btnCriar.addEventListener('click', async () => {
+            console.log('📝 Tentando criar conta...');
+            
             const nome = cadastroNome.value.trim();
             const email = cadastroEmail.value.trim().toLowerCase();
             const senha = cadastroSenha.value;
@@ -506,11 +522,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
+                console.log('📡 Enviando request para:', `${API_BASE_URL}/auth/cadastrar_usuario`);
+                
                 const response = await fetch(`${API_BASE_URL}/auth/cadastrar_usuario`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nome, email, senha }),
-                    credentials: 'include' 
+                    credentials: 'include'
                 });
                 
                 if (!response.ok) {
@@ -527,10 +545,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const data = await response.json();
+                console.log('✅ Conta criada:', data);
                 
                 showNotification(data.message || 'Conta criada com sucesso!');
                 fecharCriarConta();
                 
+                // Limpar campos
                 cadastroNome.value = '';
                 cadastroEmail.value = '';
                 cadastroSenha.value = '';
@@ -549,9 +569,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 abrirLogin();
 
             } catch (error) {
-                console.error('Erro ao criar conta:', error);
+                console.error('❌ Erro ao criar conta:', error);
                 showNotification(`Erro ao criar conta: ${error.message}`, 'error');
             }
         });
+    } else {
+        console.error('❌ Botão de criar conta NÃO encontrado!');
     }
+    
+    console.log('✅ Inicialização completa!');
 });

@@ -1,5 +1,6 @@
-
- //* NOTIFICAÇÃO
+// ===================================================================
+// NOTIFICAÇÃO
+// ===================================================================
 
 function showNotification(message, type = 'success') {
     let container = document.getElementById('notification-container');
@@ -56,10 +57,16 @@ function showNotification(message, type = 'success') {
     });
 }
 
-// URL da API
+// ===================================================================
+// CONFIGURAÇÃO DA API
+// ===================================================================
+
 const API_BASE_URL = 'https://tcc-backend-repensei.onrender.com';
 
-// Funções para abrir/fechar modais
+// ===================================================================
+// FUNÇÕES PARA ABRIR/FECHAR MODAIS
+// ===================================================================
+
 window.abrirLogin = function () {
     document.getElementById('modalLogin').classList.remove('hidden');
 }
@@ -77,7 +84,7 @@ window.fecharCriarConta = function () {
 }
 
 // ===================================================================
-// VALIDAÇÕES DO FORMULÁRIO
+// VALIDAÇÕES (mantidas como estavam)
 // ===================================================================
 
 const validacoesCadastro = {
@@ -233,7 +240,6 @@ const validacoesCadastro = {
     }
 };
 
-// Expor globalmente
 window.validacoesCadastro = validacoesCadastro;
 
 // ===================================================================
@@ -242,20 +248,21 @@ window.validacoesCadastro = validacoesCadastro;
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // Redireciona se já estiver logado
-    if (sessionStorage.getItem('currentUser')) {
-        const user = JSON.parse(sessionStorage.getItem('currentUser'));
-        if (user.plano === 'premium') {
-            window.location.href = 'premium.html';
-        } else {
-            window.location.href = 'freemium.html';
-        }
+    // 🔥 CORREÇÃO 1: Verificar se já está logado ANTES de mostrar login
+    const userSession = sessionStorage.getItem('currentUser');
+    const adminSession = sessionStorage.getItem('currentAdmin');
+    
+    if (userSession) {
+        const user = JSON.parse(userSession);
+        window.location.href = user.plano === 'premium' ? 'premium.html' : 'freemium.html';
+        return; // Para execução
     }
     
-    if (sessionStorage.getItem('currentAdmin')) {
+    if (adminSession) {
         window.location.href = 'admin.html';
+        return;
     }
-
+    
     // ===================================================================
     // CONFIGURAR TOGGLE DE SENHA
     // ===================================================================
@@ -265,10 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const button = document.getElementById(buttonId);
         const icon = document.getElementById(iconId);
         
-        if (!input || !button || !icon) {
-            console.warn(`Elementos não encontrados: ${inputId}, ${buttonId}, ${iconId}`);
-            return;
-        }
+        if (!input || !button || !icon) return;
         
         button.addEventListener('click', () => {
             const isPassword = input.type === 'password';
@@ -377,152 +381,177 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ===================================================================
-    // BOTÃO DE LOGIN
+    // BOTÃO DE LOGIN - 🔥 CORRIGIDO
     // ===================================================================
     
-    document.getElementById('entrarBtn').addEventListener('click', async () => {
-        const email = document.getElementById('loginEmail').value.trim();
-        const senha = document.getElementById('loginSenha').value;
+    const btnLogin = document.getElementById('entrarBtn');
+    if (btnLogin) {
+        btnLogin.addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value.trim();
+            const senha = document.getElementById('loginSenha').value;
 
-        if (!email || !senha) {
-            showNotification('Preencha e-mail e senha.', 'error');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, senha }),
-                credentials: 'include' 
-            });
-            
-            if (!response.ok) {
-                let errorData = { error: `Erro HTTP: ${response.status} ${response.statusText}` };
-                try {
-                    errorData = await response.json();
-                } catch (e) {}
-                throw new Error(errorData.error || `Erro ${response.status}`);
+            if (!email || !senha) {
+                showNotification('Preencha e-mail e senha.', 'error');
+                return;
             }
 
-            const data = await response.json();
-            
-            if (data.role === 'admin') {
-                sessionStorage.setItem('currentAdmin', JSON.stringify(data.user));
-                window.location.href = 'admin.html';
-            } else if (data.role === 'aluno') {
-                sessionStorage.setItem('currentUser', JSON.stringify(data.user));
+            // 🔥 Desabilita botão durante o request
+            const originalText = btnLogin.textContent;
+            btnLogin.disabled = true;
+            btnLogin.textContent = 'Entrando...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, senha }),
+                    credentials: 'include' 
+                });
                 
-                if (data.user.plano === 'premium') {
-                    window.location.href = 'premium.html';
-                } else {
-                    window.location.href = 'freemium.html';
+                if (!response.ok) {
+                    let errorData = { error: `Erro HTTP: ${response.status}` };
+                    try {
+                        errorData = await response.json();
+                    } catch (e) {}
+                    throw new Error(errorData.error || `Erro ${response.status}`);
                 }
-            } else {
-                throw new Error("Tipo de usuário desconhecido recebido do servidor.");
-            }
 
-        } catch (error) {
-            console.error('Erro ao conectar com a API de login:', error);
-            showNotification(`Erro ao fazer login: ${error.message}`, 'error');
-        }
-    });
+                const data = await response.json();
+                console.log('✅ Resposta do servidor:', data);
+                
+                // 🔥 ARMAZENAR NA SESSION STORAGE
+                if (data.role === 'admin') {
+                    sessionStorage.setItem('currentAdmin', JSON.stringify(data.user));
+                    showNotification('Login de admin realizado!');
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 500);
+                    
+                } else if (data.role === 'aluno') {
+                    sessionStorage.setItem('currentUser', JSON.stringify(data.user));
+                    showNotification('Login realizado com sucesso!');
+                    
+                    // 🔥 Redirecionar após 500ms
+                    setTimeout(() => {
+                        if (data.user.plano === 'premium') {
+                            window.location.href = 'premium.html';
+                        } else {
+                            window.location.href = 'freemium.html';
+                        }
+                    }, 500);
+                } else {
+                    throw new Error("Tipo de usuário desconhecido.");
+                }
+
+            } catch (error) {
+                console.error('❌ Erro ao fazer login:', error);
+                showNotification(`Erro ao fazer login: ${error.message}`, 'error');
+            } finally {
+                // 🔥 Reabilita botão
+                btnLogin.disabled = false;
+                btnLogin.textContent = originalText;
+            }
+        });
+    }
 
     // ===================================================================
     // BOTÃO DE CRIAR CONTA
     // ===================================================================
     
-    document.getElementById('criarContaBtn').addEventListener('click', async () => {
-        const nome = cadastroNome.value.trim();
-        const email = cadastroEmail.value.trim().toLowerCase();
-        const senha = cadastroSenha.value;
-        const confirmarSenha = cadastroConfirmarSenha.value;
+    const btnCriar = document.getElementById('criarContaBtn');
+    if (btnCriar) {
+        btnCriar.addEventListener('click', async () => {
+            const nome = cadastroNome.value.trim();
+            const email = cadastroEmail.value.trim().toLowerCase();
+            const senha = cadastroSenha.value;
+            const confirmarSenha = cadastroConfirmarSenha.value;
 
-        let temErro = false;
-        
-        const resultadoNome = validacoesCadastro.validarNome(nome);
-        if (!resultadoNome.valida) {
-            validacoesCadastro.mostrarErrosValidacao('cadastroNome', resultadoNome.erros);
-            temErro = true;
-        } else {
-            validacoesCadastro.limparErrosValidacao('cadastroNome');
-        }
-        
-        if (!validacoesCadastro.validarEmail(email)) {
-            validacoesCadastro.mostrarErrosValidacao('cadastroEmail', ['Formato de e-mail inválido']);
-            temErro = true;
-        } else {
-            validacoesCadastro.limparErrosValidacao('cadastroEmail');
-        }
-        
-        const resultadoSenha = validacoesCadastro.validarSenha(senha);
-        if (!resultadoSenha.valida) {
-            validacoesCadastro.mostrarErrosValidacao('cadastroSenha', resultadoSenha.erros);
-            temErro = true;
-        } else {
-            validacoesCadastro.limparErrosValidacao('cadastroSenha');
-        }
-        
-        if (!validacoesCadastro.validarConfirmacaoSenha(senha, confirmarSenha)) {
-            validacoesCadastro.mostrarErrosValidacao('cadastroConfirmarSenha', ['As senhas não coincidem']);
-            temErro = true;
-        } else {
-            validacoesCadastro.limparErrosValidacao('cadastroConfirmarSenha');
-        }
-        
-        if (temErro) {
-            showNotification('Por favor, corrija os erros antes de continuar.', 'error');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/auth/cadastrar_usuario`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nome, email, senha }),
-                credentials: 'include' 
-            });
+            let temErro = false;
             
-            if (!response.ok) {
-                let errorData = { error: `Erro HTTP: ${response.status} ${response.statusText}` };
-                try {
-                    errorData = await response.json();
-                } catch (e) {}
-                
-                if (errorData.detalhes) {
-                    validacoesCadastro.mostrarErrosValidacao('cadastroSenha', errorData.detalhes);
-                }
-                
-                throw new Error(errorData.error || `Erro ${response.status}`);
+            const resultadoNome = validacoesCadastro.validarNome(nome);
+            if (!resultadoNome.valida) {
+                validacoesCadastro.mostrarErrosValidacao('cadastroNome', resultadoNome.erros);
+                temErro = true;
+            } else {
+                validacoesCadastro.limparErrosValidacao('cadastroNome');
+            }
+            
+            if (!validacoesCadastro.validarEmail(email)) {
+                validacoesCadastro.mostrarErrosValidacao('cadastroEmail', ['Formato de e-mail inválido']);
+                temErro = true;
+            } else {
+                validacoesCadastro.limparErrosValidacao('cadastroEmail');
+            }
+            
+            const resultadoSenha = validacoesCadastro.validarSenha(senha);
+            if (!resultadoSenha.valida) {
+                validacoesCadastro.mostrarErrosValidacao('cadastroSenha', resultadoSenha.erros);
+                temErro = true;
+            } else {
+                validacoesCadastro.limparErrosValidacao('cadastroSenha');
+            }
+            
+            if (!validacoesCadastro.validarConfirmacaoSenha(senha, confirmarSenha)) {
+                validacoesCadastro.mostrarErrosValidacao('cadastroConfirmarSenha', ['As senhas não coincidem']);
+                temErro = true;
+            } else {
+                validacoesCadastro.limparErrosValidacao('cadastroConfirmarSenha');
+            }
+            
+            if (temErro) {
+                showNotification('Por favor, corrija os erros antes de continuar.', 'error');
+                return;
             }
 
-            const data = await response.json();
-            
-            showNotification(data.message || 'Conta criada com sucesso!');
-            fecharCriarConta();
-            
-            cadastroNome.value = '';
-            cadastroEmail.value = '';
-            cadastroSenha.value = '';
-            cadastroConfirmarSenha.value = '';
-            
-            const barra = document.getElementById('barraSenha');
-            const texto = document.getElementById('textoSenha');
-            if (barra) barra.style.width = '0%';
-            if (texto) texto.textContent = '';
-            
-            validacoesCadastro.limparErrosValidacao('cadastroNome');
-            validacoesCadastro.limparErrosValidacao('cadastroEmail');
-            validacoesCadastro.limparErrosValidacao('cadastroSenha');
-            validacoesCadastro.limparErrosValidacao('cadastroConfirmarSenha');
-            
-            abrirLogin();
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/cadastrar_usuario`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email, senha }),
+                    credentials: 'include' 
+                });
+                
+                if (!response.ok) {
+                    let errorData = { error: `Erro HTTP: ${response.status}` };
+                    try {
+                        errorData = await response.json();
+                    } catch (e) {}
+                    
+                    if (errorData.detalhes) {
+                        validacoesCadastro.mostrarErrosValidacao('cadastroSenha', errorData.detalhes);
+                    }
+                    
+                    throw new Error(errorData.error || `Erro ${response.status}`);
+                }
 
-        } catch (error) {
-            console.error('Erro ao conectar com a API de cadastro:', error);
-            showNotification(`Erro ao criar conta: ${error.message}`, 'error');
-        }
-    });
+                const data = await response.json();
+                
+                showNotification(data.message || 'Conta criada com sucesso!');
+                fecharCriarConta();
+                
+                cadastroNome.value = '';
+                cadastroEmail.value = '';
+                cadastroSenha.value = '';
+                cadastroConfirmarSenha.value = '';
+                
+                const barra = document.getElementById('barraSenha');
+                const texto = document.getElementById('textoSenha');
+                if (barra) barra.style.width = '0%';
+                if (texto) texto.textContent = '';
+                
+                validacoesCadastro.limparErrosValidacao('cadastroNome');
+                validacoesCadastro.limparErrosValidacao('cadastroEmail');
+                validacoesCadastro.limparErrosValidacao('cadastroSenha');
+                validacoesCadastro.limparErrosValidacao('cadastroConfirmarSenha');
+                
+                abrirLogin();
+
+            } catch (error) {
+                console.error('Erro ao criar conta:', error);
+                showNotification(`Erro ao criar conta: ${error.message}`, 'error');
+            }
+        });
+    }
 });
